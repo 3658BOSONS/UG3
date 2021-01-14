@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter {
 
-    private final double targetSpeed = -.35;
+    private final double targetSpeed = -.3;
     private final double paddleClear = .4;
     private final double paddleFull = .64;
 

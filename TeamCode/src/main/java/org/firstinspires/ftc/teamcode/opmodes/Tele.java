@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.hardware.Bucket;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Shooter;
+import org.firstinspires.ftc.teamcode.utils.BulkReadHandler;
 import org.firstinspires.ftc.teamcode.utils.State;
 
 @TeleOp(name="TeleopRed", group = "Tele")
@@ -18,10 +19,13 @@ public class Tele extends LinearOpMode
     private Shooter shooter;
     private Bucket bucket;
 
+    private BulkReadHandler bulk;
+
     private State state;
 
     private boolean lastBumper;
     private double targetAngle;
+    private boolean lastB;
 
     private long lastTick;
 
@@ -37,14 +41,17 @@ public class Tele extends LinearOpMode
 
         state = State.INTAKING;
         lastBumper = false;
-        targetAngle = 22;
+        targetAngle = 30;
 
         lastTick = 0;
 
         bucket.setIntaking();
 
+        bulk = new BulkReadHandler(this);
+
         while(opModeIsActive())
         {
+            double tickrate = bulk.tick();
 
             double x = gamepad1.left_stick_x * 1.5;
             double y = -gamepad1.left_stick_y;
@@ -60,6 +67,11 @@ public class Tele extends LinearOpMode
             if(bumper && !lastBumper)
             {
                 if(state == State.INTAKING)
+                {
+                    bucket.setHolding();
+                    state = State.HOLDING;
+                }
+                else if(state == State.HOLDING)
                 {
                     shooter.spinUp();
                     bucket.setShooting();
@@ -79,9 +91,24 @@ public class Tele extends LinearOpMode
             {
                 intake.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
             }
+            else if(state == State.HOLDING)
+            {
+                boolean b = gamepad1.b;
+                if(b && !lastB)
+                {
+                    bucket.unJamBucket();
+                }
+                lastB = b;
+            }
             else if(state == State.SHOOTING)
             {
                 bucket.index((gamepad1.right_trigger >= .3));
+                boolean b = gamepad1.b;
+                if(b && !lastB)
+                {
+                    bucket.unJamMag();
+                }
+                lastB = b;
             }
 
             double input = 0;
@@ -101,6 +128,10 @@ public class Tele extends LinearOpMode
                 targetAngle = 22;
 
             shooter.setAngle(targetAngle);
+
+            telemetry.clear();
+            telemetry.addData("Hz: ", tickrate);
+            telemetry.update();
         }
     }
 

@@ -5,11 +5,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Wobble {
 
-    private final double down = .24;
-    private final double aboveWall = .73;
-    private final double init = 1;
-    private final double gripping = .83;
-    private final double open = .53;
+    private final double down = .19;
+    private final double aboveWall = .7;
+    private final double init = .95;
+    private final double gripping = .45;
+    private final double open = .16;
 
     private Servo gripper;
     private Servo rotate;

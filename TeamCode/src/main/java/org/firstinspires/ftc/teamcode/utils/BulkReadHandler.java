@@ -17,6 +17,7 @@ public class BulkReadHandler
         ehub = opMode.hardwareMap.get(LynxModule.class, "Expansion Hub 3");
 
         chub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        timer = new ElapsedTime();
         timer.reset();
     }
 

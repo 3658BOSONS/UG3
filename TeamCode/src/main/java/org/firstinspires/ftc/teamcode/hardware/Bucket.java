@@ -2,13 +2,15 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Bucket {
 
     private final double magDown = .35;
     private final double magUp = .65;
-    private final double rotDown = .68;
-    private final double rotUp = .53;
+    private final double rotDown = .7;
+    private final double rotUp = .52;
+    private final double rotMiddle = .57;
     private final double indexIn = .65;
     private final double indexOut = .5;
 
@@ -44,13 +46,29 @@ public class Bucket {
     public void setIntaking(){
         mag.setPosition(magDown);
         Thread t = new Thread(lowerBucket);
-        t.run();
+        t.start();
+    }
+
+    public void setHolding()
+    {
+        rotate.setPosition(rotMiddle);
     }
 
     public void setShooting(){
-        rotate.setPosition(rotUp);
         Thread t= new Thread(raiseBucket);
-        t.run();
+        t.start();
+    }
+
+    public void unJamBucket()
+    {
+        Thread t = new Thread(jitter);
+        t.start();
+    }
+
+    public void unJamMag()
+    {
+        Thread t = new Thread(resetMag);
+        t.start();
     }
 
     public void index(boolean buttonPressed)
@@ -79,7 +97,7 @@ public class Bucket {
         public void run()
         {
             long start = System.currentTimeMillis();
-            while(System.currentTimeMillis() - start < 100);
+            while(System.currentTimeMillis() - start < 250);
             indexer.setPosition(indexIn);
             rotate.setPosition(rotDown);
             orange.setPosition(1);
@@ -91,11 +109,39 @@ public class Bucket {
         @Override
         public void run()
         {
-            long start = System.currentTimeMillis();
-            while(System.currentTimeMillis() - start < 800);
+            ElapsedTime timer = new ElapsedTime();
+            timer.reset();
+            rotate.setPosition(rotUp);
+            while(timer.milliseconds() < 200);
             mag.setPosition(magUp);
             indexer.setPosition(indexIn);
             orange.setPosition(.5);
+        }
+    };
+
+    private Runnable jitter = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            ElapsedTime timer = new ElapsedTime();
+            timer.reset();
+            rotate.setPosition(rotUp);
+            while(timer.milliseconds() < 100);
+            rotate.setPosition(rotMiddle);
+        }
+    };
+
+    private Runnable resetMag = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            ElapsedTime timer = new ElapsedTime();
+            timer.reset();
+            mag.setPosition(magDown);
+            while(timer.milliseconds() < 150);
+            mag.setPosition(magUp);
         }
     };
 }
