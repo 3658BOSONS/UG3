@@ -15,7 +15,7 @@ public class Wobble {
     private Servo rotate;
 
     public Wobble(boolean isAuto, LinearOpMode opMode){
-        gripper = opMode.hardwareMap.get(Servo.class, "wgripper");
+        gripper = opMode.hardwareMap.get(Servo.class, "warm");
         rotate = opMode.hardwareMap.get(Servo.class, "wrotate");
 
         if(isAuto){

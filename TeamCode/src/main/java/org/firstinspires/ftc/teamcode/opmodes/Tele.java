@@ -26,6 +26,7 @@ public class Tele extends LinearOpMode
     private boolean lastBumper;
     private double targetAngle;
     private boolean lastB;
+    private double turretTarget;
 
     private long lastTick;
 
@@ -42,6 +43,7 @@ public class Tele extends LinearOpMode
         state = State.INTAKING;
         lastBumper = false;
         targetAngle = 30;
+        turretTarget = 0;
 
         lastTick = 0;
 
@@ -90,6 +92,8 @@ public class Tele extends LinearOpMode
             if(state == State.INTAKING)
             {
                 intake.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
+                shooter.setTurretTarget(0);
+                turretTarget = 0;
             }
             else if(state == State.HOLDING)
             {
@@ -110,6 +114,12 @@ public class Tele extends LinearOpMode
                 }
                 lastB = b;
             }
+            if(state == State.SHOOTING || state == State.HOLDING);
+            {
+                turretTarget += (gamepad1.dpad_right ? 1 : 0) * .01;
+                turretTarget -= (gamepad1.dpad_left ? 1 : 0) * .01;
+                shooter.setTurretTarget(turretTarget);
+            }
 
             double input = 0;
             if(gamepad1.dpad_up)
@@ -128,9 +138,12 @@ public class Tele extends LinearOpMode
                 targetAngle = 22;
 
             shooter.setAngle(targetAngle);
+            shooter.tickTurret();
 
             telemetry.clear();
             telemetry.addData("Hz: ", tickrate);
+            telemetry.addData("turret: ", shooter.getTurretPosition());
+            telemetry.addData("shooter: ", shooter.getShooterVelo());
             telemetry.update();
         }
     }

@@ -8,8 +8,8 @@ public class Intake {
     private Motor in;
 
     public Intake(LinearOpMode opMode){
-        front = new Motor(opMode, "if");
-        in = new Motor(opMode, "ii");
+        front = new Motor(opMode, "ifront");
+        in = new Motor(opMode, "iinner");
 
         front.setConstants(false, false, true, true);
         in.setConstants(false, false, true, true);

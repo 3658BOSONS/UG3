@@ -24,13 +24,14 @@ public class Bucket {
     private boolean isReleasing;
     private long startReleaseTime;
 
-    private final int resetTime = 400;
+    private final int resetTime = 150;
+    private final int pushTime = 50;
 
     public Bucket(LinearOpMode opMode){
-        orange = opMode.hardwareMap.get(Servo.class, "orange");
-        indexer = opMode.hardwareMap.get(Servo.class, "indexer");
+        orange = opMode.hardwareMap.get(Servo.class, "borange");
+        indexer = opMode.hardwareMap.get(Servo.class, "bindexer");
         rotate = opMode.hardwareMap.get(Servo.class, "brotate");
-        mag = opMode.hardwareMap.get(Servo.class, "mag");
+        mag = opMode.hardwareMap.get(Servo.class, "bmag");
 
         orange.setPosition(.5);
         indexer.setPosition(indexIn);
@@ -79,7 +80,7 @@ public class Bucket {
             startIndexTime = System.currentTimeMillis();
         }
 
-        if(isIndexing && System.currentTimeMillis() - startIndexTime >= resetTime){
+        if(isIndexing && System.currentTimeMillis() - startIndexTime >= pushTime){
             isIndexing = false;
             indexer.setPosition(indexIn);
             startReleaseTime = System.currentTimeMillis();
