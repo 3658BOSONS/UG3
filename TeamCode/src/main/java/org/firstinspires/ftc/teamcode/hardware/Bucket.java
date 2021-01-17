@@ -24,8 +24,8 @@ public class Bucket {
     private boolean isReleasing;
     private long startReleaseTime;
 
-    private final int resetTime = 150;
-    private final int pushTime = 50;
+    private final int resetTime = 200;
+    private final int pushTime = 200;
 
     public Bucket(LinearOpMode opMode){
         orange = opMode.hardwareMap.get(Servo.class, "borange");

@@ -5,7 +5,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter {
 
-    private final double targetSpeed = -.9;
+    private final double targetVelocity = 9000;
+    private final double motorRatio = .6;
     private final double paddleClear = .4;
     private final double paddleFull = .64;
 
@@ -23,8 +24,8 @@ public class Shooter {
     public Shooter(LinearOpMode opMode){
         motor1 = new Motor(opMode, "shooter1");
         motor2 = new Motor(opMode, "shooter2");
-        motor1.setConstants(true, false, true, true);
-        motor2.setConstants(true, false, true, true);
+        motor1.setConstants(true, false, true, false);
+        motor2.setConstants(true, false, true, false);
         paddle = opMode.hardwareMap.get(Servo.class, "sangle");
         paddle.setPosition(paddleClear);
         turret1 = opMode.hardwareMap.get(Servo.class, "turret1");
@@ -34,18 +35,18 @@ public class Shooter {
 
         turretEnc = new Motor(opMode, "fl");
 
-        motor1.setPID(500, 0, 0);
-        motor2.setPID(500, 0, 0);
+        motor1.setPID(100, 0, 5);
+        motor2.setPID(100, 0, 5);
     }
 
     public void spinUp(){
-        motor1.setPower(targetSpeed);
-        motor2.setPower(targetSpeed);
+        motor1.setVelocity(targetVelocity * motorRatio);
+        motor2.setVelocity(targetVelocity * motorRatio);
     }
 
     public void cutPower(){
-        motor1.setPower(0);
-        motor2.setPower(0);
+        motor1.setVelocity(0);
+        motor2.setVelocity(0);
     }
 
     public void setAngle(double angle){
@@ -55,13 +56,21 @@ public class Shooter {
         paddle.setPosition((angle/angleDistance)*distance + paddleClear);
     }
 
-    public void tickTurret()
+    public double tickTurret()
     {
-        double power = ((turretEnc.getPosition() * countsPerRadian) - turretTarget) * .75;
+        double power = ((turretEnc.getPosition() * countsPerRadian) - turretTarget) * .5;
         if(power > 1) power = 1;
         if(power < -1) power = -1;
+
+        if(Math.abs(power) < .01)
+            power = 0;
+
+        if(Math.abs(power) < .05 && power != 0)
+            power = (Math.abs(power) / power) * .05;
+
         turret1.setPosition((power + 1) / 2);
         turret2.setPosition((power + 1) / 2);
+        return (power + 1) / 2;
     }
 
     public void setTurretTarget(double target)
@@ -78,7 +87,7 @@ public class Shooter {
         return turretEnc.getPosition() * countsPerRadian;
     }
     public double getShooterVelo(){
-        return motor2.getVelocity();
+        return motor1.getVelocity() / motorRatio;
     }
 
 }

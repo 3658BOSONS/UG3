@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Wobble {
 
-    private final double down = .19;
+    private final double down = .15;
     private final double aboveWall = .7;
     private final double init = .95;
     private final double gripping = .45;
@@ -15,8 +15,8 @@ public class Wobble {
     private Servo rotate;
 
     public Wobble(boolean isAuto, LinearOpMode opMode){
-        gripper = opMode.hardwareMap.get(Servo.class, "warm");
-        rotate = opMode.hardwareMap.get(Servo.class, "wrotate");
+        gripper = opMode.hardwareMap.get(Servo.class, "wgripper");
+        rotate = opMode.hardwareMap.get(Servo.class, "warm");
 
         if(isAuto){
             gripper.setPosition(gripping);

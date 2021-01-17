@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.hardware.Bucket;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Shooter;
+import org.firstinspires.ftc.teamcode.hardware.Wobble;
 import org.firstinspires.ftc.teamcode.utils.BulkReadHandler;
 import org.firstinspires.ftc.teamcode.utils.State;
 
@@ -18,6 +19,7 @@ public class Tele extends LinearOpMode
     private Intake intake;
     private Shooter shooter;
     private Bucket bucket;
+    private Wobble wobble;
 
     private BulkReadHandler bulk;
 
@@ -27,6 +29,8 @@ public class Tele extends LinearOpMode
     private double targetAngle;
     private boolean lastB;
     private double turretTarget;
+    private boolean lastX;
+    private boolean isGripping;
 
     private long lastTick;
 
@@ -39,11 +43,15 @@ public class Tele extends LinearOpMode
         intake = new Intake(this);
         shooter = new Shooter(this);
         bucket = new Bucket(this);
+        wobble = new Wobble(false, this);
 
         state = State.INTAKING;
         lastBumper = false;
         targetAngle = 30;
         turretTarget = 0;
+
+        lastX = false;
+        isGripping = false;
 
         lastTick = 0;
 
@@ -53,7 +61,8 @@ public class Tele extends LinearOpMode
 
         while(opModeIsActive())
         {
-            double tickrate = bulk.tick();
+            double tickrate = bulk.tick(true, false);
+            dt.track();
 
             double x = gamepad1.left_stick_x * 1.5;
             double y = -gamepad1.left_stick_y;
@@ -72,6 +81,7 @@ public class Tele extends LinearOpMode
                 {
                     bucket.setHolding();
                     state = State.HOLDING;
+                    wobble.lowerArm();
                 }
                 else if(state == State.HOLDING)
                 {
@@ -84,6 +94,7 @@ public class Tele extends LinearOpMode
                     shooter.cutPower();
                     bucket.setIntaking();
                     state = State.INTAKING;
+                    wobble.raiseArm();
                 }
             }
 
@@ -121,6 +132,25 @@ public class Tele extends LinearOpMode
                 shooter.setTurretTarget(turretTarget);
             }
 
+            if(gamepad1.a){
+                wobble.lowerArm();
+            }
+            if(gamepad1.y){
+                wobble.raiseArm();
+            }
+            boolean buttonx = gamepad1.x;
+            if(buttonx && !lastX){
+                if(!isGripping){
+                    wobble.grip();
+                    isGripping = true;
+                }
+                else{
+                    wobble.release();
+                    isGripping = false;
+                }
+            }
+            lastX = buttonx;
+
             double input = 0;
             if(gamepad1.dpad_up)
                 input = 1;
@@ -138,12 +168,16 @@ public class Tele extends LinearOpMode
                 targetAngle = 22;
 
             shooter.setAngle(targetAngle);
-            shooter.tickTurret();
+            double sPower = shooter.tickTurret();
 
             telemetry.clear();
             telemetry.addData("Hz: ", tickrate);
-            telemetry.addData("turret: ", shooter.getTurretPosition());
+            /*telemetry.addData("turret: ", shooter.getTurretPosition());
             telemetry.addData("shooter: ", shooter.getShooterVelo());
+            telemetry.addData("turret power: ", sPower);*/
+            telemetry.addData("x: ", dt.getPosition().x);
+            telemetry.addData("y: ", dt.getPosition().y);
+            telemetry.addData("h: ", dt.getPosition().heading * 360 / (2 * Math.PI));
             telemetry.update();
         }
     }

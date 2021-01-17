@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 public class Motor
 {
 
@@ -51,7 +53,11 @@ public class Motor
     }
 
     public double getVelocity() {
-        return motor.getVelocity();
+        return motor.getVelocity() * 60 / 28;
+    }
+
+    public void setVelocity(double rpm){
+        motor.setVelocity(rpm * 28 / 60);
     }
 
     public void setPID(double p, double i, double d)
