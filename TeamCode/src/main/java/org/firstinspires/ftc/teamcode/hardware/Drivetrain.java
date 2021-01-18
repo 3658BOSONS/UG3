@@ -41,13 +41,13 @@ public class Drivetrain {
 
     public void drive(double theta, double power, double turn){
 
-        double x = power * Math.cos(theta) * 1.5;
+        double x = power * Math.cos(theta);
         double y = power * Math.sin(theta);
 
-        double flPower = y + x + turn;
-        double blPower = y - x + turn;
-        double frPower = y - x - turn;
-        double brPower = y + x - turn;
+        double flPower = y + x - turn;
+        double blPower = y - x - turn;
+        double frPower = y - x + turn;
+        double brPower = y + x + turn;
 
         double maxPower = 1;
 
@@ -88,22 +88,17 @@ public class Drivetrain {
         double dXA = dX;
         double dYA = dY;
 
-        /*if(dHeading != 0){
-            double ry = dY / dHeading;
-            double rx = dX / dHeading;
-            double h1 = (180 - dHeading) / 2;
-            double yY = ry * Math.sin(dHeading);
-            double xY = yY * 1/Math.tan(h1);
-            double xX = rx * Math.sin(dHeading);
-            double yX = xX * 1/Math.tan(h1);
+        if(dHeading != 0){
+            double sinTerm = Math.sin(dHeading)/dHeading;
+            double cosTerm = (Math.cos(dHeading) - 1)/dHeading;
 
-            dXA = xX + xY;
-            dYA = yY + yX;
-        }*/
+            dXA = sinTerm * dX - cosTerm* dY;
+            dYA = cosTerm * dX + sinTerm * dY;
+        }
 
         double r = Math.sqrt((dXA * dXA) + (dYA * dYA));
         double t = Math.atan2(dYA, dXA);
-        t+=position.heading + (dHeading / 2);
+        t += position.heading;
         double xf = r * Math.cos(t);
         double yf = r * Math.sin(t);
 

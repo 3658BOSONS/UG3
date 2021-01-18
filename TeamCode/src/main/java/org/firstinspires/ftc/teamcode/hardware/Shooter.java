@@ -1,42 +1,53 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.utils.PIDF;
 
 public class Shooter {
 
-    private final double targetVelocity = 9000;
+    private final double targetVelocity = 7000;
     private final double motorRatio = .6;
     private final double paddleClear = .4;
     private final double paddleFull = .64;
 
     private double turretTarget;
     private final double countsPerRadian = 1/(8192 * 2 / (2 * Math.PI));
+    private PIDF turretPid;
 
     private Motor motor1;
     private Motor motor2;
     private Servo paddle;
-    private Servo turret1;
-    private Servo turret2;
+    private CRServo turret1;
+    private CRServo turret2;
 
     private Motor turretEnc;
 
     public Shooter(LinearOpMode opMode){
         motor1 = new Motor(opMode, "shooter1");
         motor2 = new Motor(opMode, "shooter2");
-        motor1.setConstants(true, false, true, false);
-        motor2.setConstants(true, false, true, false);
+        motor1.setConstants(false, false, true, false);
+        motor2.setConstants(false, false, true, false);
         paddle = opMode.hardwareMap.get(Servo.class, "sangle");
         paddle.setPosition(paddleClear);
-        turret1 = opMode.hardwareMap.get(Servo.class, "turret1");
-        turret1.setPosition(.5);
-        turret2 = opMode.hardwareMap.get(Servo.class, "turret2");
-        turret2.setPosition(.5);
+        turret1 = opMode.hardwareMap.get(CRServo.class, "turret1");
+        turret1.setPower(0);
+        turret2 = opMode.hardwareMap.get(CRServo.class, "turret2");
+        turret2.setPower(0);
+
+        turret1.setDirection(DcMotorSimple.Direction.REVERSE);
+        turret2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         turretEnc = new Motor(opMode, "fl");
 
-        motor1.setPID(100, 0, 5);
-        motor2.setPID(100, 0, 5);
+        turretPid = new PIDF(1, 0, 1.5, 0);
+
+        motor1.setPID(400, 50, 10);
+        motor2.setPID(400, 50, 10);
     }
 
     public void spinUp(){
@@ -58,19 +69,21 @@ public class Shooter {
 
     public double tickTurret()
     {
-        double power = ((turretEnc.getPosition() * countsPerRadian) - turretTarget) * .5;
-        if(power > 1) power = 1;
-        if(power < -1) power = -1;
+        double power = turretPid.tick(turretEnc.getPosition() * countsPerRadian);
 
-        if(Math.abs(power) < .01)
+        if(Math.abs(power) > .2){
+            power = (Math.abs(power) / power) * .2;
+        }
+
+        if(Math.abs(power) < .001)
             power = 0;
 
         if(Math.abs(power) < .05 && power != 0)
             power = (Math.abs(power) / power) * .05;
 
-        turret1.setPosition((power + 1) / 2);
-        turret2.setPosition((power + 1) / 2);
-        return (power + 1) / 2;
+        turret1.setPower(power);
+        turret2.setPower(power);
+        return power;
     }
 
     public void setTurretTarget(double target)
@@ -81,6 +94,8 @@ public class Shooter {
             turretTarget = Math.PI;
         else if(turretTarget < -Math.PI)
             turretTarget = -Math.PI;
+
+        turretPid.setTarget(turretTarget);
     }
 
     public double getTurretPosition(){

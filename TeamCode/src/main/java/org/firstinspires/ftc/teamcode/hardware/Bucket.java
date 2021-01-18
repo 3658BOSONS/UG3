@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class Bucket {
 
     private final double magDown = .35;
+    private final double mag1 = .43;
+    private final double mag2 = .53;
     private final double magUp = .65;
     private final double rotDown = .7;
     private final double rotUp = .52;
@@ -20,12 +22,14 @@ public class Bucket {
     private Servo mag;
 
     private boolean isIndexing;
-    private long startIndexTime;
     private boolean isReleasing;
-    private long startReleaseTime;
+    private int shootingLevel;
+    private boolean isRaising;
+    private ElapsedTime resetTimer;
 
-    private final int resetTime = 200;
-    private final int pushTime = 200;
+    private final int resetTime = 100;
+    private final int pushTime = 100;
+    private final int raiseTime = 300;
 
     public Bucket(LinearOpMode opMode){
         orange = opMode.hardwareMap.get(Servo.class, "borange");
@@ -37,15 +41,18 @@ public class Bucket {
         indexer.setPosition(indexIn);
         rotate.setPosition(rotDown);
         mag.setPosition(magDown);
+        shootingLevel = 0;
 
         isIndexing = false;
-        startIndexTime = 0;
         isReleasing= false;
-        startReleaseTime = 0;
+        isRaising = false;
+        resetTimer = new ElapsedTime();
+        resetTimer.reset();
     }
 
     public void setIntaking(){
         mag.setPosition(magDown);
+        shootingLevel = 0;
         Thread t = new Thread(lowerBucket);
         t.start();
     }
@@ -72,23 +79,41 @@ public class Bucket {
         t.start();
     }
 
+    public void deactivateOrange(){
+        orange.setPosition(.5);
+    }
+
     public void index(boolean buttonPressed)
     {
-        if(buttonPressed && !isIndexing && !isReleasing){
+        if(buttonPressed && !isIndexing && !isReleasing && !isRaising){
             indexer.setPosition(indexOut);
             isIndexing = true;
-            startIndexTime = System.currentTimeMillis();
+            resetTimer.reset();
         }
 
-        if(isIndexing && System.currentTimeMillis() - startIndexTime >= pushTime){
+        if(isIndexing && resetTimer.milliseconds() >= pushTime){
             isIndexing = false;
+            resetTimer.reset();
             indexer.setPosition(indexIn);
-            startReleaseTime = System.currentTimeMillis();
             isReleasing = true;
         }
 
-        if(isReleasing && System.currentTimeMillis() - startReleaseTime >= resetTime){
+        if(isReleasing && resetTimer.milliseconds() >= resetTime){
             isReleasing = false;
+            /*if(shootingLevel == 0){
+                shootingLevel = 1;
+                mag.setPosition(mag2);
+            }else if(shootingLevel == 1){
+                shootingLevel = 2;
+                //mag.setPosition(magUp);
+                unJamMag();
+            }*/
+            resetTimer.reset();
+            isRaising = true;
+        }
+
+        if(isRaising && resetTimer.milliseconds() >= raiseTime){
+            isRaising = false;
         }
     }
 
@@ -141,7 +166,7 @@ public class Bucket {
             ElapsedTime timer = new ElapsedTime();
             timer.reset();
             mag.setPosition(magDown);
-            while(timer.milliseconds() < 150);
+            while(timer.milliseconds() < 75);
             mag.setPosition(magUp);
         }
     };

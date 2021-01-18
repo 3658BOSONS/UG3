@@ -16,6 +16,7 @@ public class Motor
 
     public Motor(LinearOpMode opMode, String label){
         motor = opMode.hardwareMap.get(DcMotorEx.class, label);
+
     }
 
     public void setConstants(boolean speedMode, boolean brakeMode, boolean resetEncoder, boolean forward){

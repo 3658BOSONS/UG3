@@ -8,7 +8,9 @@ import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Shooter;
 import org.firstinspires.ftc.teamcode.hardware.Wobble;
+import org.firstinspires.ftc.teamcode.utils.BosonMath;
 import org.firstinspires.ftc.teamcode.utils.BulkReadHandler;
+import org.firstinspires.ftc.teamcode.utils.PIDF;
 import org.firstinspires.ftc.teamcode.utils.State;
 
 @TeleOp(name="TeleopRed", group = "Tele")
@@ -25,12 +27,18 @@ public class Tele extends LinearOpMode
 
     private State state;
 
+    private PIDF heading;
+
     private boolean lastBumper;
     private double targetAngle;
     private boolean lastB;
     private double turretTarget;
     private boolean lastX;
     private boolean isGripping;
+    private boolean lastDpad;
+
+    private double goalX = 3660;
+    private double goalY = 700;
 
     private long lastTick;
 
@@ -40,14 +48,18 @@ public class Tele extends LinearOpMode
         waitForStart();
 
         dt = new Drivetrain(this);
+        dt.getPosition().x = 2130;
+        dt.getPosition().y = 914;
         intake = new Intake(this);
         shooter = new Shooter(this);
         bucket = new Bucket(this);
         wobble = new Wobble(false, this);
 
+        heading = new PIDF(2.5, 0, .25, 0);
+
         state = State.INTAKING;
         lastBumper = false;
-        targetAngle = 30;
+        targetAngle = 33;
         turretTarget = 0;
 
         lastX = false;
@@ -61,17 +73,9 @@ public class Tele extends LinearOpMode
 
         while(opModeIsActive())
         {
-            double tickrate = bulk.tick(true, false);
+            telemetry.clear();
+            double looptime = bulk.tick(true, false);
             dt.track();
-
-            double x = gamepad1.left_stick_x * 1.5;
-            double y = -gamepad1.left_stick_y;
-            double turn = gamepad1.right_stick_x;
-
-            double p = Math.sqrt((x * x) + (y * y));
-            double theta = Math.atan2(y, x);
-
-            dt.drive(theta, p, turn);
 
             boolean bumper = false;
             bumper = gamepad1.right_bumper;
@@ -99,6 +103,7 @@ public class Tele extends LinearOpMode
             }
 
             lastBumper = bumper;
+            double turn = 0;
 
             if(state == State.INTAKING)
             {
@@ -117,6 +122,18 @@ public class Tele extends LinearOpMode
             }
             else if(state == State.SHOOTING)
             {
+                double xToGoal = goalX - dt.getPosition().x;
+                double yToGoal = goalY - dt.getPosition().y;
+                double distanceToGoal = Math.hypot(xToGoal, yToGoal);
+                double angleToGoal = Math.atan2(yToGoal, xToGoal);
+                double dtAngle = BosonMath.clipAngle(dt.getPosition().heading);
+                heading.setTarget(angleToGoal);
+                telemetry.addData("atg ", angleToGoal);
+                telemetry.addData("dta ", dtAngle);
+                turn = heading.tick(dtAngle);
+
+                targetAngle = (1.0/380.0)*distanceToGoal + 28.05;
+
                 bucket.index((gamepad1.right_trigger >= .3));
                 boolean b = gamepad1.b;
                 if(b && !lastB)
@@ -125,12 +142,16 @@ public class Tele extends LinearOpMode
                 }
                 lastB = b;
             }
-            if(state == State.SHOOTING || state == State.HOLDING);
-            {
-                turretTarget += (gamepad1.dpad_right ? 1 : 0) * .01;
-                turretTarget -= (gamepad1.dpad_left ? 1 : 0) * .01;
-                shooter.setTurretTarget(turretTarget);
-            }
+
+            double x = gamepad1.left_stick_x * 1.5;
+            double y = -gamepad1.left_stick_y;
+            if(gamepad1.right_stick_x != 0)
+                turn = -gamepad1.right_stick_x;
+
+            double p = Math.sqrt((x * x) + (y * y));
+            double theta = Math.atan2(y, x);
+
+            dt.drive(theta, p, turn);
 
             if(gamepad1.a){
                 wobble.lowerArm();
@@ -151,33 +172,36 @@ public class Tele extends LinearOpMode
             }
             lastX = buttonx;
 
-            double input = 0;
-            if(gamepad1.dpad_up)
-                input = 1;
-            else if(gamepad1.dpad_down)
-                input = -1;
-
-            input *= 23;
-            input *= .003;
-
-            targetAngle += input;
-
-            if(targetAngle > 45)
-                targetAngle = 45;
-            if(targetAngle < 22)
-                targetAngle = 22;
+            if(gamepad1.dpad_up && !lastDpad){
+                goalX += 25;
+                lastDpad = true;
+            }
+            else if(gamepad1.dpad_down && !lastDpad){
+                goalX -= 25;
+                lastDpad = true;
+            }
+            else if(gamepad1.dpad_right && !lastDpad){
+                goalY -= 25;
+                lastDpad = true;
+            }
+            else if(gamepad1.dpad_left && !lastDpad){
+                goalY += 25;
+                lastDpad = true;
+            }else{
+                lastDpad = false;
+            }
 
             shooter.setAngle(targetAngle);
             double sPower = shooter.tickTurret();
 
-            telemetry.clear();
-            telemetry.addData("Hz: ", tickrate);
-            /*telemetry.addData("turret: ", shooter.getTurretPosition());
-            telemetry.addData("shooter: ", shooter.getShooterVelo());
-            telemetry.addData("turret power: ", sPower);*/
-            telemetry.addData("x: ", dt.getPosition().x);
-            telemetry.addData("y: ", dt.getPosition().y);
-            telemetry.addData("h: ", dt.getPosition().heading * 360 / (2 * Math.PI));
+            telemetry.addData("Hz: ", looptime);
+            telemetry.addData("angle ", targetAngle);
+           // bulk.tick(false, true);
+            //telemetry.addData("shooter: ", shooter.getShooterVelo());
+            telemetry.addData("turret power: ", sPower);
+            //telemetry.addData("x: ", dt.getPosition().x);
+            //telemetry.addData("y: ", dt.getPosition().y);
+            //telemetry.addData("h: ", dt.getPosition().heading * 360 / (2 * Math.PI));
             telemetry.update();
         }
     }
