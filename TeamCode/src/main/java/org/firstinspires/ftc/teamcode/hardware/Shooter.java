@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.utils.PIDF;
 
 public class Shooter {
 
-    private final double targetVelocity = 7000;
-    private final double motorRatio = .6;
+    private final double targetVelocity = 8000;
+    private final double motorRatio = .5;
     private final double paddleClear = .4;
     private final double paddleFull = .64;
 
@@ -46,8 +46,8 @@ public class Shooter {
 
         turretPid = new PIDF(1, 0, 1.5, 0);
 
-        motor1.setPID(400, 50, 10);
-        motor2.setPID(400, 50, 10);
+        motor1.setPID(50, 10, 5);
+        motor2.setPID(50, 10, 5);
     }
 
     public void spinUp(){
@@ -102,7 +102,7 @@ public class Shooter {
         return turretEnc.getPosition() * countsPerRadian;
     }
     public double getShooterVelo(){
-        return motor1.getVelocity() / motorRatio;
+        return motor2.getVelocity() / motorRatio;
     }
 
 }

@@ -28,6 +28,7 @@ public class Tele extends LinearOpMode
     private State state;
 
     private PIDF heading;
+    private PIDF translate;
 
     private boolean lastBumper;
     private double targetAngle;
@@ -39,6 +40,9 @@ public class Tele extends LinearOpMode
 
     private double goalX = 3660;
     private double goalY = 700;
+
+    private double spotX = 1600;
+    private double spotY = 900;
 
     private long lastTick;
 
@@ -55,7 +59,8 @@ public class Tele extends LinearOpMode
         bucket = new Bucket(this);
         wobble = new Wobble(false, this);
 
-        heading = new PIDF(2.5, 0, .25, 0);
+        heading = new PIDF(3.25, 0, .25, 0);
+        translate = new PIDF(.003, 0, .001, 0);
 
         state = State.INTAKING;
         lastBumper = false;
@@ -104,6 +109,8 @@ public class Tele extends LinearOpMode
 
             lastBumper = bumper;
             double turn = 0;
+            double power = 0;
+            double theta = 0;
 
             if(state == State.INTAKING)
             {
@@ -132,7 +139,14 @@ public class Tele extends LinearOpMode
                 telemetry.addData("dta ", dtAngle);
                 turn = heading.tick(dtAngle);
 
-                targetAngle = (1.0/380.0)*distanceToGoal + 28.05;
+                translate.setTarget(Math.hypot(spotX, spotY));
+                power = Math.abs(translate.tick(Math.hypot(dt.getPosition().x, dt.getPosition().y)));
+                double xToSpot = spotX - dt.getPosition().x;
+                double yToSpot = spotY - dt.getPosition().y;
+                double angleToSpot = Math.atan2(yToSpot, xToSpot);
+                theta = angleToSpot + Math.PI/2 - dt.getPosition().heading;
+
+                targetAngle = (1.0/380.0)*distanceToGoal + 25.2;
 
                 bucket.index((gamepad1.right_trigger >= .3));
                 boolean b = gamepad1.b;
@@ -147,11 +161,12 @@ public class Tele extends LinearOpMode
             double y = -gamepad1.left_stick_y;
             if(gamepad1.right_stick_x != 0)
                 turn = -gamepad1.right_stick_x;
+            if(x != 0 || y != 0){
+                power = Math.hypot(x, y);
+                theta = Math.atan2(y, x);
+            }
 
-            double p = Math.sqrt((x * x) + (y * y));
-            double theta = Math.atan2(y, x);
-
-            dt.drive(theta, p, turn);
+            dt.drive(theta, power, turn);
 
             if(gamepad1.a){
                 wobble.lowerArm();
@@ -196,8 +211,8 @@ public class Tele extends LinearOpMode
 
             telemetry.addData("Hz: ", looptime);
             telemetry.addData("angle ", targetAngle);
-           // bulk.tick(false, true);
-            //telemetry.addData("shooter: ", shooter.getShooterVelo());
+            bulk.tick(false, true);
+            telemetry.addData("shooter: ", shooter.getShooterVelo());
             telemetry.addData("turret power: ", sPower);
             //telemetry.addData("x: ", dt.getPosition().x);
             //telemetry.addData("y: ", dt.getPosition().y);
