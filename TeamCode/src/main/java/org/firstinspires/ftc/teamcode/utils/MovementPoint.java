@@ -22,6 +22,8 @@ public class MovementPoint
     {
         this.x = x;
         this.y = y;
+        this.headingX = x;
+        this.headingY = y;
         this.theta = -5; //arbitrary number outside of range
         this.tolerance = tolerance;
     }

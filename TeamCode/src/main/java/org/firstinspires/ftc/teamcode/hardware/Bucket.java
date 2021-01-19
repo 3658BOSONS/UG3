@@ -83,7 +83,7 @@ public class Bucket {
         orange.setPosition(.5);
     }
 
-    public void index(boolean buttonPressed)
+    public boolean index(boolean buttonPressed)
     {
         if(buttonPressed && !isIndexing && !isReleasing && !isRaising){
             indexer.setPosition(indexOut);
@@ -110,11 +110,13 @@ public class Bucket {
             }*/
             resetTimer.reset();
             isRaising = true;
+            return true;
         }
 
         if(isRaising && resetTimer.milliseconds() >= raiseTime){
             isRaising = false;
         }
+        return false;
     }
 
     private Runnable lowerBucket = new Runnable()

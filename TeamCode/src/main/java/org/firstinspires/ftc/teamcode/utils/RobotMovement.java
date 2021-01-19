@@ -12,8 +12,8 @@ public class RobotMovement
     private static double maxSpeed;
     private static double maxTurn;
     private static double lastTTheta;
-    public static PIDF xyPID = new PIDF(.003, 0, .000, 0);
-    private static PIDF headingPID = new PIDF(.8, 0, 0, 0);
+    public static PIDF xyPID = new PIDF(.01, 0, 1, 0);
+    private static PIDF headingPID = new PIDF(3.25, 0, .25, 0);
 
     public static void setPoint(MovementPoint point, double maxS, double maxT){
         targetPoint = point;
@@ -25,31 +25,32 @@ public class RobotMovement
         headingPID.setTarget(0.0);
     }
 
-    public static boolean driveTowardPoint(Drivetrain dt, State state, Telemetry telemetry, boolean isLastPoint, int reverse) //Sets the DT power to move towards the point, returns true when within tolerance
+    public static boolean driveTowardPoint(Drivetrain dt, Telemetry telemetry, boolean isLastPoint, int reverse) //Sets the DT power to move towards the point, returns true when within tolerance
     { //1 for reverse, 0 for not
         double dX = targetPoint.getX() - dt.getPosition().x;
         double dY = targetPoint.getY() - dt.getPosition().y;
-        double cTheta = Math.atan2(Math.sin(dt.getPosition().heading), Math.cos(dt.getPosition().heading)); //-pi, pi
+        double cTheta = BosonMath.clipAngle(dt.getPosition().heading);
         double tTheta = targetPoint.getTheta();
         if(tTheta == -5){
-            tTheta = Math.atan2(dY, dX) + (Math.PI * reverse);
-            tTheta = Math.atan2(Math.sin(tTheta), Math.cos(tTheta));
+            tTheta = BosonMath.clipAngle(Math.atan2(targetPoint.getHeadingY() - dt.getPosition().y, targetPoint.getHeadingX() - dt.getPosition().x) + (Math.PI * reverse));
         }
 
-        double distToPoint = Math.sqrt((dX * dX) + (dY * dY));
-        double dirToPoint =  Math.atan2(dY, dX) - cTheta - (Math.PI / 2);
+        double distToPoint = Math.hypot(dX, dY);
+        double dirToPoint =  Math.atan2(dY, dX) - cTheta + Math.PI/2;
 
-        if(Math.abs(distToPoint) < 200 && targetPoint.getTheta() == -5){ //If within 50mm of target, stop changing the heading
+        if(Math.abs(distToPoint) < 50 && targetPoint.getTheta() == -5){ //If within 50mm of target, stop changing the heading
             tTheta = lastTTheta;
         }
 
-        double dTheta = tTheta - cTheta;
-        if(Math.abs(dTheta) > Math.PI){
-            dTheta = (360 - Math.abs(dTheta)) * -(Math.abs(dTheta) / dTheta);
+        if(tTheta - cTheta > Math.PI){
+            tTheta = (Math.abs(tTheta) + Math.PI) * (tTheta / -tTheta);
         }
 
-        double driveSpeed = xyPID.tick(distToPoint);
-        double turnSpeed = headingPID.tick(dTheta);
+        xyPID.setTarget(Math.hypot(targetPoint.getX(), targetPoint.getY()));
+        headingPID.setTarget(tTheta);
+
+        double driveSpeed = xyPID.tick(Math.hypot(dt.getPosition().x, dt.getPosition().y));
+        double turnSpeed = headingPID.tick(cTheta);
 
         if(Math.abs(driveSpeed) > maxSpeed || !isLastPoint){
             driveSpeed = maxSpeed * (Math.abs(driveSpeed) / driveSpeed);
@@ -67,7 +68,7 @@ public class RobotMovement
         telemetry.addData("target", 0);
         telemetry.addData("Drive Speed", driveSpeed);
 
-        dt.drive(driveSpeed, dirToPoint, turnSpeed);
+        dt.drive(dirToPoint, Math.abs(driveSpeed), turnSpeed);
         lastTTheta = tTheta;
         return false;
     }

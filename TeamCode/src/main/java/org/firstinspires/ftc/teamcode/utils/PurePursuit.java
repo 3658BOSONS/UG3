@@ -23,21 +23,18 @@ public class PurePursuit //class declaration
         this.currentPointHeading = 1;
     }
 
-    public boolean purePursuit(Drivetrain dt, State state, OpMode op, double speed, double turnSpeed, int reverse)
+    public boolean purePursuit(Drivetrain dt, OpMode op, double speed, double turnSpeed, int reverse)
     {
         op.telemetry.addLine("point: " + currentPoint);//printing current point to phone
         if(currentPoint == points.size() - 1) //Last point
         {
             RobotMovement.setPoint(points.get(currentPoint), speed, turnSpeed); //set point to last point
-            return RobotMovement.driveTowardPoint(dt, state, op.telemetry, true, reverse);//drive towards last point and return result
+            return RobotMovement.driveTowardPoint(dt, op.telemetry, true, reverse);//drive towards last point and return result
         }
         else
         {
             double[] intersections1 = getIntersections(points.get(currentPoint - 1), points.get(currentPoint), dt.getPosition().x, dt.getPosition().y, lookahead); //first intersect
             double[] intersections2 = getIntersections(points.get(currentPoint), points.get(currentPoint + 1), dt.getPosition().y, dt.getPosition().y, lookahead); //second intersect
-
-            double[] intersections1theta = getIntersections(points.get(currentPointHeading - 1), points.get(currentPointHeading), dt.getPosition().x, dt.getPosition().y, lookaheadHeading); //first intersect
-            double[] intersections2theta = getIntersections(points.get(currentPointHeading), points.get(currentPointHeading + 1), dt.getPosition().y, dt.getPosition().y, lookaheadHeading); //second intersect
 
             double x = 0;
             double y = 0;
@@ -63,6 +60,14 @@ public class PurePursuit //class declaration
                 x = points.get(currentPoint).getX();
                 y = points.get(currentPoint).getY();
             }
+
+            if(currentPointHeading == points.size() - 1){
+                RobotMovement.setPoint(new MovementPoint(x, y, points.get(currentPoint).getTheta(), 0, points.get(points.size() - 1).getX(), points.get(points.size() - 1).getY()), speed, turnSpeed);
+                return false;
+            }
+
+            double[] intersections1theta = getIntersections(points.get(currentPointHeading - 1), points.get(currentPointHeading), dt.getPosition().x, dt.getPosition().y, lookaheadHeading); //first intersect
+            double[] intersections2theta = getIntersections(points.get(currentPointHeading), points.get(currentPointHeading + 1), dt.getPosition().x, dt.getPosition().y, lookaheadHeading); //second intersect
 
             double headingX = 0;
             double headingY = 0;
@@ -90,7 +95,7 @@ public class PurePursuit //class declaration
             }
             RobotMovement.setPoint(new MovementPoint(x, y, points.get(currentPoint).getTheta(), 0, headingX, headingY), speed, turnSpeed);
         }
-        RobotMovement.driveTowardPoint(dt, state, op.telemetry,false, reverse);
+        RobotMovement.driveTowardPoint(dt, op.telemetry,false, reverse);
         return false;
     }
 

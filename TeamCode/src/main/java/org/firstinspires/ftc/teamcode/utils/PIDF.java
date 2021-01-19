@@ -31,8 +31,10 @@ public class PIDF
 
     public void setTarget(double target)
     {
+        if(this.target != target){
+            resetI();
+        }
         this.target = target;
-        resetI();
     }
 
     public double tick(double position)
