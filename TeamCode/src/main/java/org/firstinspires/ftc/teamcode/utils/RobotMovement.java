@@ -12,8 +12,8 @@ public class RobotMovement
     private static double maxSpeed;
     private static double maxTurn;
     private static double lastTTheta;
-    public static PIDF xyPID = new PIDF(.01, 0, 1, 0);
-    private static PIDF headingPID = new PIDF(3.25, 0, .25, 0);
+    public static PIDF xyPID = new PIDF(.1, 0, .5, 0);
+    private static PIDF headingPID = new PIDF(2, 0, 1, 0);
 
     public static void setPoint(MovementPoint point, double maxS, double maxT){
         targetPoint = point;
@@ -38,12 +38,12 @@ public class RobotMovement
         double distToPoint = Math.hypot(dX, dY);
         double dirToPoint =  Math.atan2(dY, dX) - cTheta + Math.PI/2;
 
-        if(Math.abs(distToPoint) < 50 && targetPoint.getTheta() == -5){ //If within 50mm of target, stop changing the heading
+        if(Math.abs(distToPoint) < 100 && targetPoint.getTheta() == -5){ //If within 50mm of target, stop changing the heading
             tTheta = lastTTheta;
         }
 
-        if(tTheta - cTheta > Math.PI){
-            tTheta = (Math.abs(tTheta) + Math.PI) * (tTheta / -tTheta);
+        if(Math.abs(tTheta - cTheta) > Math.PI){
+            tTheta = (Math.toRadians(360) - Math.abs(tTheta)) * (Math.abs(cTheta) / cTheta);
         }
 
         xyPID.setTarget(Math.hypot(targetPoint.getX(), targetPoint.getY()));

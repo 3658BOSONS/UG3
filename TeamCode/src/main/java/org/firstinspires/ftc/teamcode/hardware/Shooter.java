@@ -15,17 +15,11 @@ public class Shooter {
     private final double paddleClear = .4;
     private final double paddleFull = .64;
 
-    private double CPR = 8192 * 2 / (2 * Math.PI);
-
     private Motor motor1;
     private Motor motor2;
     private Servo paddle;
     private Servo turret1;
     private Servo turret2;
-
-    private Motor turretEnc;
-    private double turretTarget;
-    private double turretValue;
 
     public Shooter(LinearOpMode opMode){
         motor1 = new Motor(opMode, "shooter1");
@@ -39,11 +33,12 @@ public class Shooter {
         turret2 = opMode.hardwareMap.get(Servo.class, "turret2");
         turret2.setPosition(.5);
 
-        turretEnc = new Motor(opMode, "fl");
-        turretTarget = 0;
-
         motor1.setPID(50, 10, 5);
         motor2.setPID(50, 10, 5);
+    }
+
+    public void setAngleGround(){
+        paddle.setPosition(0);
     }
 
     public void spinUp(){
