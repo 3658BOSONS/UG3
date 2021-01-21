@@ -56,8 +56,6 @@ public class Tele extends LinearOpMode
         waitForStart();
 
         dt = new Drivetrain(this);
-        dt.getPosition().x = 2130;
-        dt.getPosition().y = 914;
         intake = new Intake(this);
         shooter = new Shooter(this);
         bucket = new Bucket(this);
@@ -188,6 +186,13 @@ public class Tele extends LinearOpMode
             }
 
             dt.drive(dtValues[0], dtValues[1], dtValues[2]);
+
+            if(gamepad1.left_stick_button && gamepad1.right_stick_button){
+                dt.resetEncoder();
+                dt.getPosition().x = 455/2;
+                dt.getPosition().y = 455/2;
+                dt.getPosition().heading = 0;
+            }
 
             if(gamepad1.a){
                 wobble.lowerArm();

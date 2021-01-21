@@ -32,7 +32,7 @@ public class RingDetector
 
         cam.openCameraDevice();
         cam.setPipeline(pipeline);
-        cam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+        cam.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
     }
 
     public void stopStreaming(){
@@ -67,8 +67,8 @@ class Pipeline extends OpenCvPipeline
     private static final float w = 640f;
     private static final float h = 480f;
 
-    private static final Point TL = new Point(w*(1f/8f), h*(1f/8f));
-    private static final Point BR = new Point(w*(7f/8f), h*(7f/8f));
+    private static final Point BR = new Point(w*(10f/16f), h*(11f/16f));
+    private static final Point TL = new Point(w*(7f/16f), h*(15f/16f));
 
     @Override
     public void onViewportTapped()
@@ -90,14 +90,14 @@ class Pipeline extends OpenCvPipeline
     }
 
     public int getDecision(){
-        if(color.getB() < 30){
-            return 0;
+        if(color.getB() < 125){
+            return 4;
         }
-        else if(color.getB() < 100){
+        else if(color.getB() < 150){
             return 1;
         }
         else{
-            return 4;
+            return 0;
         }
     }
 
@@ -106,11 +106,11 @@ class Pipeline extends OpenCvPipeline
         int r = 0;
         int g = 0;
         int b = 0;
-        int tot = 0;
+        int tot = 1;
 
-        for(int x = (int)p1.x; x<(int)p2.x; x++)
+        for(int x = (int)p1.x; x<(int)p2.x; x+=2)
         {
-            for(int y = (int)p1.y; y<(int)p2.y; y++)
+            for(int y = (int)p2.y; y<(int)p1.y; y+=2)
             {
                 r += input.get(y, x)[0];
                 g += input.get(y, x)[1];

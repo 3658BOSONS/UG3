@@ -9,9 +9,9 @@ public class Bucket {
     private final double magDown = .35;
     private final double mag1 = .43;
     private final double mag2 = .53;
-    private final double magUp = .69;
+    private final double magUp = .72;
     private final double rotDown = .7;
-    private final double rotUp = .55;
+    private final double rotUp = .5;
     private final double rotMiddle = .57;
     private final double indexIn = .65;
     private final double indexOut = .5;
@@ -55,6 +55,12 @@ public class Bucket {
         shootingLevel = 0;
         Thread t = new Thread(lowerBucket);
         t.start();
+    }
+
+    public void resetIndexing(){
+        isIndexing = false;
+        isReleasing = false;
+        isRaising = false;
     }
 
     public void setHolding()

@@ -15,7 +15,7 @@ public class Drivetrain {
     private OdoWheel right;
     private OdoWheel back;
 
-    private Pose position;
+    private static Pose position = new Pose();
 
     private final double REAR_DIST = 210.0;
     private final double TRACK_WIDTH = 370.4; //1797 3 tiles
@@ -31,8 +31,13 @@ public class Drivetrain {
         right = new OdoWheel(false, 58, fr);
         back = new OdoWheel(false, 58, bl);
 
-        position = new Pose();
+        fl.setConstants(false, true, false, true);
+        fr.setConstants(false, true, false, false);
+        bl.setConstants(false, true, false, true);
+        br.setConstants(false, true, false, false);
+    }
 
+    public void resetEncoder(){
         fl.setConstants(false, true, true, true);
         fr.setConstants(false, true, true, false);
         bl.setConstants(false, true, true, true);

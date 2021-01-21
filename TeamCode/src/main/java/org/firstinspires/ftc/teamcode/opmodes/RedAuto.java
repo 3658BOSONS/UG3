@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.hardware.Shooter;
 import org.firstinspires.ftc.teamcode.hardware.Wobble;
 import org.firstinspires.ftc.teamcode.paths.Red0;
 import org.firstinspires.ftc.teamcode.paths.Red1;
+import org.firstinspires.ftc.teamcode.paths.Red4;
 import org.firstinspires.ftc.teamcode.utils.AutoAimer;
 import org.firstinspires.ftc.teamcode.utils.BulkReadHandler;
 import org.firstinspires.ftc.teamcode.utils.MovementPoint;
@@ -48,6 +49,7 @@ public class RedAuto extends LinearOpMode
 
     private Red0 noring;
     private Red1 onering;
+    private Red4 fourring;
 
     @Override
     public void runOpMode()
@@ -58,15 +60,18 @@ public class RedAuto extends LinearOpMode
         bucket = new Bucket(this);
         intake = new Intake(this);
 
+        dt.resetEncoder();
+
         aim = new AutoAimer(dt, shooter);
 
-        //detector = new RingDetector(this);
+        detector = new RingDetector(this);
 
         bulk = new BulkReadHandler(this);
 
         timer = new ElapsedTime();
         noring = new Red0();
         onering = new Red1();
+        fourring = new Red4();
 
         powerShots = false;
         cPath = 0;
@@ -77,25 +82,23 @@ public class RedAuto extends LinearOpMode
         bucket.deactivateOrange();
         dt.getPosition().x = 230;
         dt.getPosition().y = 990;
+        dt.getPosition().heading = 0;
         shooter.setAngle(22);
         shooter.setTurretAngle(0);
         shooter.setAngleGround();
 
         ArrayList<MovementPoint> psDrive = new ArrayList<>();
         psDrive.add(new MovementPoint(450, 1000, 0));
-        psDrive.add(new MovementPoint(550, 1500, 0));
-        psDrive.add(new MovementPoint(700, 1400, Math.toRadians(0), 100));
+        psDrive.add(new MovementPoint(550, 1600, 0));
+        psDrive.add(new MovementPoint(1200, 1300, 100));
 
         powerDrive = new PurePursuit(psDrive);
 
         waitForStart();
 
-        //READ DISCS
-        //int rings = detector.getDecision();
-        //detector.stopStreaming();
+        int rings = detector.getDecision();
+        detector.stopStreaming();
 
-
-        int rings = 1; //OVERRIDE FOR EASY EARLY TESTING
         while(opModeIsActive())
         {
             telemetry.clear();
@@ -114,6 +117,10 @@ public class RedAuto extends LinearOpMode
                 {
                     tick1();
                 }
+                else
+                {
+                    tick4();
+                }
             }
             telemetry.update();
         }
@@ -129,10 +136,10 @@ public class RedAuto extends LinearOpMode
             timer.reset();
             bucket.setShooting();
             shooter.spinUp();
-            while(opModeIsActive() && timer.milliseconds() < 1500){
+            while(opModeIsActive() && timer.milliseconds() < 2000){
                 bulk.tick(true, false);
                 dt.track();
-                double[] drive = aim.track(Positions.psRightX, Positions.psRightY, 900, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psRightX, Positions.psRightY, 1700, 1300, 0, 0, 0);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
             timer.reset();
@@ -140,14 +147,14 @@ public class RedAuto extends LinearOpMode
                 bulk.tick(true, false);
                 dt.track();
                 bucket.index(true);
-                double[] drive = aim.track(Positions.psRightX, Positions.psRightY, 900, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psRightX, Positions.psRightY, 1700, 1300, 0, 0, 0);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
 
             while(opModeIsActive() && timer.milliseconds() < 1000){
                 bulk.tick(true, false);
                 dt.track();
-                double[] drive = aim.track(Positions.psMidX, Positions.psMidY, 900, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psMidX, Positions.psMidY, 1700, 1300, 0, 0, 0);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
             timer.reset();
@@ -155,14 +162,14 @@ public class RedAuto extends LinearOpMode
                 bulk.tick(true, false);
                 dt.track();
                 bucket.index(true);
-                double[] drive = aim.track(Positions.psMidX, Positions.psMidY, 900, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psMidX, Positions.psMidY, 1700, 1300, 0, 0, 0);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
 
             while(opModeIsActive() && timer.milliseconds() < 1000){
                 bulk.tick(true, false);
                 dt.track();
-                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 900, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1700, 1300, 0, 0, 0);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
             timer.reset();
@@ -170,7 +177,7 @@ public class RedAuto extends LinearOpMode
                 bulk.tick(true, false);
                 dt.track();
                 bucket.index(true);
-                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 900, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1700, 1300, 0, 0, 0);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
             powerShots = true;
@@ -340,10 +347,18 @@ public class RedAuto extends LinearOpMode
                 dt.track();
             }
             intake.setPower(0);
-            bucket.setShooting();
+            bucket.setHolding();
             shooter.spinUp();
             timer.reset();
-            while(timer.milliseconds() < 1000){
+            while(timer.milliseconds() < 500){
+                bulk.tick(true, false);
+                dt.track();
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1600, 1000, 0, 0, 24.3);
+                dt.drive(powers[0], powers[1], powers[2]);
+            }
+            bucket.setShooting();
+            timer.reset();
+            while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
                 double[] powers = aim.track(Positions.goalX, Positions.goalY, 1600, 1000, 0, 0, 24.3);
@@ -382,7 +397,7 @@ public class RedAuto extends LinearOpMode
                 dt.track();
                 dt.drive(-Math.PI/2, 1, 0);
             }
-            RobotMovement.setPoint(new MovementPoint(1700, 1100, Math.toRadians(45), 50), 1, 1);
+            RobotMovement.setPoint(new MovementPoint(1900, 1100, Math.toRadians(45), 50), 1, 1);
             while(!RobotMovement.driveTowardPoint(dt, telemetry, true, 0) && opModeIsActive()){
                 bulk.tick(true, false);
                 dt.track();
@@ -396,6 +411,191 @@ public class RedAuto extends LinearOpMode
 
         lPath = cPath;
         lPoint = onering.getPaths().get(cPath).getCurrentPoint();
+    }
+
+    public void tick4()
+    {
+        if(cPath == 0)
+        {
+            if(fourring.getPaths().get(cPath).purePursuit(dt, this, .75, 1, 0)){
+                cPath++;
+            }
+        }
+
+        if(cPath == 1 && lPath == 0)
+        {
+            wobble.lowerArm();
+            timer.reset();
+            while(timer.milliseconds() < 1000){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            wobble.release();
+            timer.reset();
+            while(timer.milliseconds() < 100){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            timer.reset();
+            while(timer.milliseconds() < 250){
+                bulk.tick(true, false);
+                dt.track();
+                dt.drive(-Math.PI/2, 1, 0);
+            }
+        }
+        if(cPath == 1){
+            double speed = .7;
+            if(fourring.getPaths().get(cPath).getCurrentPoint() > 1){
+                speed = .3;
+            }
+            if(fourring.getPaths().get(cPath).purePursuit(dt, this, speed, 1, 0)){
+                cPath++;
+            }
+        }
+        if(cPath == 2 && lPath == 1){
+            wobble.grip();
+            timer.reset();
+            while(timer.milliseconds() < 200){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            wobble.raiseArm();
+            timer.reset();
+            while(timer.milliseconds() < 100){
+                bulk.tick(true, false);
+                dt.track();
+            }
+        }
+        if(cPath == 2){
+            if(fourring.getPaths().get(cPath).purePursuit(dt, this, .75, 1, 0)){
+                cPath++;
+            }
+        }
+        if(cPath == 3 && lPath == 2){
+            intake.setPower(1);
+        }
+        if(cPath == 3){
+            if(fourring.getPaths().get(cPath).purePursuit(dt, this, .25, 1, 0)){
+                cPath++;
+            }
+        }
+        if(cPath == 4 && lPath == 3){
+            timer.reset();
+            wobble.lowerALittle();
+            while(timer.milliseconds() < 1000){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            intake.setPower(-.25);
+            bucket.setHolding();
+            shooter.spinUp();
+            bucket.unJamBucket();
+            timer.reset();
+            while(timer.milliseconds() < 1000){
+                bulk.tick(true, false);
+                dt.track();
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 950, 850, 0, -1.5, 23.8);
+                dt.drive(powers[0], powers[1], powers[2]);
+            }
+            bucket.setShooting();
+            timer.reset();
+            while(timer.milliseconds() < 1000){
+                bulk.tick(true, false);
+                dt.track();
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 950, 850, 0, -1.5, 23.8);
+                dt.drive(powers[0], powers[1], powers[2]);
+            }
+            dt.drive(0,0,0);
+            timer.reset();
+            bucket.resetIndexing();
+            while(timer.milliseconds() < 900){
+                bucket.index(true);
+                bulk.tick(true, false);
+                dt.track();
+            }
+            shooter.cutPower();
+            bucket.setIntaking();
+            intake.setPower(1);
+        }
+        if(cPath == 4){
+            if(fourring.getPaths().get(cPath).purePursuit(dt, this, .4, 1, 0)){
+                cPath++;
+            }
+        }
+        if(cPath == 5 && lPath == 4){
+            timer.reset();
+            while(timer.milliseconds() < 1000){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            intake.setPower(0);
+            bucket.setHolding();
+            shooter.spinUp();
+            bucket.unJamBucket();
+            timer.reset();
+            while(timer.milliseconds() < 500){
+                bulk.tick(true, false);
+                dt.track();
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1600, 850, 0, 0, 23.8);
+                dt.drive(powers[0], powers[1], powers[2]);
+            }
+            bucket.setShooting();
+            timer.reset();
+            while(timer.milliseconds() < 750){
+                bulk.tick(true, false);
+                dt.track();
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1600, 850, 0, 0, 23.8);
+                dt.drive(powers[0], powers[1], powers[2]);
+            }
+            dt.drive(0,0,0);
+            timer.reset();
+            bucket.resetIndexing();
+            while(timer.milliseconds() < 1000){
+                bucket.index(true);
+                bulk.tick(true, false);
+                dt.track();
+            }
+            shooter.cutPower();
+            bucket.setIntaking();
+        }
+        if(cPath == 5){
+            if(fourring.getPaths().get(cPath).purePursuit(dt, this, .75, 1, 0)){
+                cPath++;
+            }
+        }
+        if(cPath == 6 && lPath == 5){
+            wobble.lowerArm();
+            timer.reset();
+            while(timer.milliseconds() < 250){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            wobble.release();
+            timer.reset();
+            while(timer.milliseconds() < 150){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            timer.reset();
+            while(timer.milliseconds() < 250){
+                bulk.tick(true, false);
+                dt.track();
+                dt.drive(-Math.PI/2, 1, 0);
+            }
+            RobotMovement.setPoint(new MovementPoint(2100, 1100, 50), 1, 1);
+            while(!RobotMovement.driveTowardPoint(dt, telemetry, true, 1) && opModeIsActive()){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            dt.drive(0, 0, 0);
+            while(opModeIsActive()){
+                bulk.tick(true, false);
+                dt.track();
+            }
+        }
+
+        lPath = cPath;
+        lPoint = fourring.getPaths().get(cPath).getCurrentPoint();
     }
 
 }

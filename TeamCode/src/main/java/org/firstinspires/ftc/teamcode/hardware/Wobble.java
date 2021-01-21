@@ -39,5 +39,8 @@ public class Wobble {
     public void raiseArm(){
         rotate.setPosition(aboveWall);
     }
+    public void lowerALittle(){
+        rotate.setPosition(.35);
+    }
 
 }
