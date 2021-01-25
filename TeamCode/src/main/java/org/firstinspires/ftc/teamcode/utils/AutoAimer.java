@@ -21,13 +21,13 @@ public class AutoAimer
         this.shooter = shooter;
 
         translation = new PIDF(.01, 0,.5, 0);
-        heading = new PIDF(3.25, 0, .25, 0);
+        heading = new PIDF(4, 0, 25, 0);
 
         c = 0;
     }
 
     public double[] track(double targetX, double targetY, double posX, double posY, double angleOffset, double headingOffset, double angleIntercept){
-        double[] dtValues = new double[3];
+        double[] dtValues = new double[4];
 
         double xToGoal = targetX - dt.getPosition().x;
         double yToGoal = targetY - dt.getPosition().y;
@@ -38,10 +38,11 @@ public class AutoAimer
             shooter.setTurretAngle(angleToGoal - dtAngle + Math.toRadians(headingOffset));
         }
 
-        if(Math.abs(angleToGoal - dtAngle + Math.toRadians(headingOffset)) > Math.toRadians(50)){
-            heading.setTarget(angleToGoal - dtAngle + headingOffset);
+        if(Math.abs(angleToGoal - dtAngle + Math.toRadians(headingOffset)) > .75){
+            heading.setTarget(angleToGoal - dtAngle + Math.toRadians(headingOffset));
             dtValues[2] = heading.tick(dtAngle);
         }
+        dtValues[3] =  BosonMath.clipAngle(shooter.getTurretAngle() + dt.getPosition().heading - Math.toRadians(headingOffset)) - angleToGoal;
 
         translation.setTarget(Math.hypot(posX, posY));
         dtValues[1] = Math.abs(translation.tick(Math.hypot(dt.getPosition().x, dt.getPosition().y)));

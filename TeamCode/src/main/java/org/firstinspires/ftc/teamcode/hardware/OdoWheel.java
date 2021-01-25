@@ -15,6 +15,10 @@ public class OdoWheel
         last = 0;
     }
 
+    public void setEncoder(Motor encoder){
+        this.encoder = encoder;
+    }
+
     public double getMM(){
         return encoder.getPosition() / CPMM;
     }

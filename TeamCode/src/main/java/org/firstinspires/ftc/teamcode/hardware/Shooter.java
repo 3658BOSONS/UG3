@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.utils.PIDF;
 
 public class Shooter {
 
-    private final double targetVelocity = 8000;
-    private final double motorRatio = .5;
+    private final double targetVelocity = 8500;
+    private final double motorRatio = .44;
     private final double paddleClear = .4;
     private final double paddleFull = .64;
 
@@ -20,6 +20,10 @@ public class Shooter {
     private Servo paddle;
     private Servo turret1;
     private Servo turret2;
+
+    private Motor turretEnc;
+    private double turretTarget;
+    private final double CPR = 8192 * 2 / (2 * Math.PI);
 
     public Shooter(LinearOpMode opMode){
         motor1 = new Motor(opMode, "shooter1");
@@ -33,12 +37,24 @@ public class Shooter {
         turret2 = opMode.hardwareMap.get(Servo.class, "turret2");
         turret2.setPosition(.5);
 
-        motor1.setPID(50, 10, 5);
-        motor2.setPID(50, 10, 5);
+        turretEnc = new Motor(opMode, "fl");
+        turretTarget = 0;
+
+        motor1.setPID(100, 4, 1);
+        motor2.setPID(100, 4, 1);
     }
 
     public void setAngleGround(){
         paddle.setPosition(0);
+    }
+
+    public void setPid(double P, double I, double D){
+        motor2.setPID(P, I, D);
+        motor1.setPID(P, I, D);
+    }
+
+    public void resetTurretEncoder(){
+        turretEnc.setConstants(false, true, true, true);
     }
 
     public void spinUp(){
@@ -59,15 +75,26 @@ public class Shooter {
     }
 
     public void setTurretAngle(double angle){
-        if(angle > Math.toRadians(75)){
-            angle = Math.toRadians(75);
-        }else if(angle < Math.toRadians(-75)){
-            angle = Math.toRadians( -75);
+        double maxAngle = 1.08;
+        angle -= .08;
+        if(angle > maxAngle){
+            angle = maxAngle;
+        }else if(angle < -maxAngle){
+            angle = -maxAngle;
         }
 
-        angle += Math.toRadians(75);
-        turret1.setPosition(angle/Math.toRadians(150) - .03);
-        turret2.setPosition(angle / Math.toRadians(150) - .02);
+        angle /= maxAngle;
+        double pos = angle / (maxAngle);
+        pos += 1;
+        pos /= 2;
+
+        turretTarget = angle;
+        turret1.setPosition(pos);
+        turret2.setPosition(pos);
+    }
+
+    public double getTurretAngle(){
+        return -turretEnc.getPosition() / CPR;
     }
 
     public double getShooterVelo(){

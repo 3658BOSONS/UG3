@@ -12,6 +12,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
+import org.openftc.easyopencv.OpenCvTracker;
 
 public class RingDetector
 {
@@ -63,12 +64,16 @@ class Pipeline extends OpenCvPipeline
     }
 
     private Color color = new Color();
+    private Color lowerColor = new Color();
 
     private static final float w = 640f;
     private static final float h = 480f;
 
     private static final Point BR = new Point(w*(10f/16f), h*(11f/16f));
-    private static final Point TL = new Point(w*(7f/16f), h*(15f/16f));
+    private static final Point TL = new Point(w*(7f/16f), h*(13f/16f));
+
+    private static final Point BR2 = new Point(w*(10f/16f), h*(26f/32f));
+    private static final Point TL2 = new Point(w*(7f/16f), h*(29f/32f));
 
     @Override
     public void onViewportTapped()
@@ -81,8 +86,10 @@ class Pipeline extends OpenCvPipeline
     {
 
         Imgproc.rectangle(input, TL, BR, new Scalar(0, 255, 0), 2);
+        Imgproc.rectangle(input, TL2, BR2, new Scalar(0, 255, 0), 2);
 
         process(TL, BR, input, color);
+        process(TL2, BR2, input, lowerColor);
 
         tellemData();
 
@@ -90,10 +97,12 @@ class Pipeline extends OpenCvPipeline
     }
 
     public int getDecision(){
-        if(color.getB() < 125){
+        int cutoff = 105;
+
+        if(color.getB() < cutoff && lowerColor.getB() < cutoff){
             return 4;
         }
-        else if(color.getB() < 150){
+        else if(lowerColor.getB() < cutoff){
             return 1;
         }
         else{
@@ -131,6 +140,7 @@ class Pipeline extends OpenCvPipeline
     private void tellemData(){
         op.telemetry.clear();
         op.telemetry.addLine("Color:  R" + color.getR() + " G " + color.getG() + " B " + color.getB());
+        op.telemetry.addLine("Lower:  R" + lowerColor.getR() + " G " + lowerColor.getG() + " B " + lowerColor.getB());
         op.telemetry.addLine("Decision: " + getDecision());
         op.telemetry.update();
     }

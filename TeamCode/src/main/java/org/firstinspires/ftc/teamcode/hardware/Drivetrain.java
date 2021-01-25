@@ -12,10 +12,14 @@ public class Drivetrain {
     private Motor br;
 
     private OdoWheel left;
-    private OdoWheel right;
+    private  OdoWheel right;
     private OdoWheel back;
 
-    private static Pose position = new Pose();
+    private Pose position = new Pose();
+
+    public static double xOffset = 0;
+    public static double yOffset = 0;
+    public static double headingOffset = 0;
 
     private final double REAR_DIST = 210.0;
     private final double TRACK_WIDTH = 370.4; //1797 3 tiles
@@ -27,21 +31,30 @@ public class Drivetrain {
         bl = new Motor(opMode, "bl");
         br = new Motor(opMode, "br");
 
-        left = new OdoWheel(true, 58, br);
-        right = new OdoWheel(false, 58, fr);
-        back = new OdoWheel(false, 58, bl);
-
-        fl.setConstants(false, true, false, true);
-        fr.setConstants(false, true, false, false);
-        bl.setConstants(false, true, false, true);
-        br.setConstants(false, true, false, false);
-    }
-
-    public void resetEncoder(){
         fl.setConstants(false, true, true, true);
         fr.setConstants(false, true, true, false);
         bl.setConstants(false, true, true, true);
         br.setConstants(false, true, true, false);
+
+        left = new OdoWheel(true, 58, br);
+        right = new OdoWheel(false, 58, fr);
+        back = new OdoWheel(false, 58, bl);
+    }
+
+    public void resetEncoder(){
+        fr.setConstants(false, true, true, false);
+        bl.setConstants(false, true, true, true);
+        br.setConstants(false, true, true, false);
+
+        left = new OdoWheel(true, 58, br);
+        right = new OdoWheel(false, 58, fr);
+        back = new OdoWheel(false, 58, bl);
+    }
+
+    public void setOffsets(double x, double y, double heading){
+        xOffset = x;
+        yOffset = y;
+        headingOffset = heading;
     }
 
     public void drive(double theta, double power, double turn){
@@ -84,7 +97,7 @@ public class Drivetrain {
         double dRight = right.getDeltaMM();
         double dBack = back.getDeltaMM();
 
-        double heading = (aRight - aLeft) / TRACK_WIDTH;
+        double heading = ((aRight - aLeft) / TRACK_WIDTH) + headingOffset;
         double dHeading = heading - position.heading;
 
         double dY = dBack + (REAR_DIST * dHeading);

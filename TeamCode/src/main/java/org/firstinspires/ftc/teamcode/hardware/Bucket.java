@@ -9,9 +9,9 @@ public class Bucket {
     private final double magDown = .35;
     private final double mag1 = .43;
     private final double mag2 = .53;
-    private final double magUp = .72;
+    private final double magUp = .645;
     private final double rotDown = .7;
-    private final double rotUp = .5;
+    private final double rotUp = .53;
     private final double rotMiddle = .57;
     private final double indexIn = .65;
     private final double indexOut = .5;
@@ -29,7 +29,7 @@ public class Bucket {
 
     private final int resetTime = 100;
     private final int pushTime = 100;
-    private final int raiseTime = 600;
+    private final int raiseTime = 200;
 
     public Bucket(LinearOpMode opMode){
         orange = opMode.hardwareMap.get(Servo.class, "borange");

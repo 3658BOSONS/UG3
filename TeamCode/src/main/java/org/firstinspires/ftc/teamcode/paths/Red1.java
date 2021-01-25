@@ -17,13 +17,13 @@ public class Red1
         ArrayList<MovementPoint> points1 = new ArrayList<>();
         points1.add(new MovementPoint(900, 1300, 0));
         points1.add(new MovementPoint(1500, 1600, 0));
-        points1.add(new MovementPoint(2575, 1125, Math.toRadians(-30), 50));
+        points1.add(new MovementPoint(2575, 1150, Math.toRadians(-30), 50));
         paths.add(new PurePursuit(points1));
 
         ArrayList<MovementPoint> points2 = new ArrayList<>();
         points2.add(new MovementPoint(2300, 800, 0));
         points2.add(new MovementPoint(1400, 200, 0));
-        points2.add(new MovementPoint(900, 325, Math.toRadians(170), 15));
+        points2.add(new MovementPoint(825, 225, Math.toRadians(170), 15));
         paths.add(new PurePursuit(points2));
 
         ArrayList<MovementPoint> points3 = new ArrayList<>();
