@@ -136,6 +136,7 @@ public class Tele extends LinearOpMode
                 intake.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
                 shooter.setTurretAngle(0);
                 turretTarget = 0;
+                bucket.reverseOrange(gamepad1.b);
             }
             else if(state == State.HOLDING)
             {

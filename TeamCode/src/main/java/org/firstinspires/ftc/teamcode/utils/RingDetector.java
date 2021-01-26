@@ -2,10 +2,17 @@ package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -13,6 +20,9 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvTracker;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RingDetector
 {
@@ -26,14 +36,14 @@ public class RingDetector
     {
         this.op = op;
         this.pipe = pipe;
-        this.pipeline = new Pipeline(op);
+        this.pipeline = new Pipeline(op.telemetry);
 
         int cameraMonitorViewId = op.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", op.hardwareMap.appContext.getPackageName());
         cam = OpenCvCameraFactory.getInstance().createWebcam(op.hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
         cam.openCameraDevice();
         cam.setPipeline(pipeline);
-        cam.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
+        cam.startStreaming(320, 240, OpenCvCameraRotation.UPSIDE_DOWN);
     }
 
     public void stopStreaming(){
@@ -57,23 +67,25 @@ public class RingDetector
 class Pipeline extends OpenCvPipeline
 {
 
-    OpMode op;
+    private Telemetry telemetry;
+    private final Scalar lowerOrange = new Scalar(0.0, 141.0, 0.0);
+    private final Scalar upperOrange = new Scalar(255.0, 230.0, 115.0);
+    private final int CAMERA_WIDTH = 320;
+    private final int HORIZON = (int) (140.0 / 320.0 * (double) CAMERA_WIDTH);
+    private final int MIN_WIDTH = (int) (50.0 / 320.0 * (double) CAMERA_WIDTH);
+    private final double BOUND_RATIO = 0.8;
 
-    public Pipeline(OpMode op){
-        this.op = op;
+    private Mat mat;
+    private Mat ret;
+    private int height;
+
+    public Pipeline(Telemetry telemetry)
+    {
+        this.telemetry = telemetry;
+        this.height = 0;
+        this.mat = new Mat();
+        this.ret = new Mat();
     }
-
-    private Color color = new Color();
-    private Color lowerColor = new Color();
-
-    private static final float w = 640f;
-    private static final float h = 480f;
-
-    private static final Point BR = new Point(w*(10f/16f), h*(11f/16f));
-    private static final Point TL = new Point(w*(7f/16f), h*(13f/16f));
-
-    private static final Point BR2 = new Point(w*(10f/16f), h*(26f/32f));
-    private static final Point TL2 = new Point(w*(7f/16f), h*(29f/32f));
 
     @Override
     public void onViewportTapped()
@@ -84,64 +96,72 @@ class Pipeline extends OpenCvPipeline
     @Override
     public Mat processFrame(Mat input)
     {
+        ret.release();
+        ret = new Mat();
 
-        Imgproc.rectangle(input, TL, BR, new Scalar(0, 255, 0), 2);
-        Imgproc.rectangle(input, TL2, BR2, new Scalar(0, 255, 0), 2);
+        Imgproc.cvtColor(input, mat, Imgproc.COLOR_RGB2YCrCb); //converting color spaces or something weird help me jaran
 
-        process(TL, BR, input, color);
-        process(TL2, BR2, input, lowerColor);
+        Mat mask = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC1); // something lol
+        Core.inRange(mat, lowerOrange, upperOrange, mask);
 
-        tellemData();
+        Core.bitwise_and(input, input, ret, mask); //something else lol
+        Imgproc.GaussianBlur(mask, mask, new Size(15.0, 15.0), 0.00); //rip noise you know we had to do it to em
 
-        return input;
+        //doin a contour
+        ArrayList<MatOfPoint> contours = new ArrayList();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
+
+        Imgproc.drawContours(ret, contours, -1, new Scalar(0.0, 255.0, 0.0), 3); //drawing things maybe
+
+        //finding the widest contour
+        int maxWidth = 0;
+        Rect maxRect =  new Rect();
+        for (int i = 0; i < contours.size(); i++) {
+            MatOfPoint c = contours.get(i);
+            MatOfPoint2f copy =  new MatOfPoint2f(c.toArray()); //what kotlin has pointers? I gotta switch
+            Rect rect = Imgproc.boundingRect(copy);
+
+            int w = rect.width;
+            // checking if the rectangle is below the horizon
+            if (w > maxWidth && rect.y + rect.height > HORIZON) {
+                maxWidth = w;
+                maxRect = rect;
+            }
+            c.release(); // releasing the buffer of the contour, since after use, it is no longer needed
+            copy.release(); // releasing the buffer of the copy of the contour, since after use, it is no longer needed
+        }
+
+        Imgproc.rectangle(ret, maxRect, new Scalar(0.0, 0.0, 255.0), 2); //drawing widest something
+        Imgproc.line(ret, new Point(.0, (double) HORIZON), new Point((double) CAMERA_WIDTH, (double) HORIZON), new Scalar(255.0, .0, 255.0)); //drawing horizon
+
+        //setting height
+        if (maxWidth >= MIN_WIDTH) {
+            double aspectRatio = (double) maxRect.height / (double) maxRect.width;
+
+            /** checks if aspectRatio is greater than BOUND_RATIO
+            * to determine whether stack is ONE or FOUR lol jaran comment
+            */
+            if (aspectRatio > BOUND_RATIO)
+                height = 4;
+            else
+                height = 1;
+        } else {
+        height = 0;
+        }
+
+        telemetry.clear();
+        telemetry.addData("RINGS: ", height);
+        telemetry.update();
+
+        mat.release();
+        mask.release();
+        hierarchy.release();
+
+        return ret;
     }
 
     public int getDecision(){
-        int cutoff = 105;
-
-        if(color.getB() < cutoff && lowerColor.getB() < cutoff){
-            return 4;
-        }
-        else if(lowerColor.getB() < cutoff){
-            return 1;
-        }
-        else{
-            return 0;
-        }
-    }
-
-    public void process(Point p1, Point p2, Mat input, Color c)
-    {
-        int r = 0;
-        int g = 0;
-        int b = 0;
-        int tot = 1;
-
-        for(int x = (int)p1.x; x<(int)p2.x; x+=2)
-        {
-            for(int y = (int)p2.y; y<(int)p1.y; y+=2)
-            {
-                r += input.get(y, x)[0];
-                g += input.get(y, x)[1];
-                b += input.get(y, x)[2];
-                tot++;
-            }
-        }
-        r/=tot;
-        g/=tot;
-        b/=tot;
-
-
-        c.setR(r);
-        c.setG(g);
-        c.setB(b);
-    }
-
-    private void tellemData(){
-        op.telemetry.clear();
-        op.telemetry.addLine("Color:  R" + color.getR() + " G " + color.getG() + " B " + color.getB());
-        op.telemetry.addLine("Lower:  R" + lowerColor.getR() + " G " + lowerColor.getG() + " B " + lowerColor.getB());
-        op.telemetry.addLine("Decision: " + getDecision());
-        op.telemetry.update();
+        return height;
     }
 }

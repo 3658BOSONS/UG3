@@ -12,7 +12,7 @@ public class Bucket {
     private final double magUp = .645;
     private final double rotDown = .7;
     private final double rotUp = .53;
-    private final double rotMiddle = .57;
+    private final double rotMiddle = .6;
     private final double indexIn = .65;
     private final double indexOut = .5;
 
@@ -27,9 +27,9 @@ public class Bucket {
     private boolean isRaising;
     private ElapsedTime resetTimer;
 
-    private final int resetTime = 100;
-    private final int pushTime = 100;
-    private final int raiseTime = 200;
+    private final int resetTime = 80;
+    private final int pushTime = 80;
+    private final int raiseTime = 250;
 
     public Bucket(LinearOpMode opMode){
         orange = opMode.hardwareMap.get(Servo.class, "borange");
@@ -87,6 +87,13 @@ public class Bucket {
 
     public void deactivateOrange(){
         orange.setPosition(.5);
+    }
+
+    public void reverseOrange(boolean reversed){
+        if(reversed)
+            orange.setPosition(0);
+        else
+            orange.setPosition(1);
     }
 
     public boolean index(boolean buttonPressed)
