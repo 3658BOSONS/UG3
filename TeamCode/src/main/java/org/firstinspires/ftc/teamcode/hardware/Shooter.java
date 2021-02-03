@@ -10,10 +10,11 @@ import org.firstinspires.ftc.teamcode.utils.PIDF;
 
 public class Shooter {
 
-    private final double targetVelocity = 8500;
-    private final double motorRatio = .44;
-    private final double paddleClear = .4;
-    private final double paddleFull = .64;
+    private final double targetVelocity = 5600;
+    private final double targetPS = 5400;
+    private final double motorRatio = .66;
+    private final double paddleClear = .24;
+    private final double paddleFull =-.06;
 
     private Motor motor1;
     private Motor motor2;
@@ -40,8 +41,8 @@ public class Shooter {
         turretEnc = new Motor(opMode, "fl");
         turretTarget = 0;
 
-        motor1.setPID(100, 4, 1);
-        motor2.setPID(100, 4, 1);
+        motor1.setPID(150, 4, 1);
+        motor2.setPID(150, 4, 1);
     }
 
     public void setAngleGround(){
@@ -60,6 +61,11 @@ public class Shooter {
     public void spinUp(){
         motor1.setVelocity(targetVelocity * motorRatio);
         motor2.setVelocity(targetVelocity * motorRatio);
+    }
+
+    public void spinPowershots(){
+        motor1.setVelocity(targetPS * motorRatio);
+        motor2.setVelocity(targetPS * motorRatio);
     }
 
     public void cutPower(){

@@ -45,7 +45,7 @@ public class Tele extends LinearOpMode
     private double psSpotY = 1300;
 
     private int currentPowershot;
-    private double lastTrigger;
+    private boolean lastL;
 
     private double distanceOffset;
     private double sidewaysOffset;
@@ -76,8 +76,8 @@ public class Tele extends LinearOpMode
         lastX = false;
         isGripping = false;
 
-        currentPowershot = 0;
-        lastTrigger = 0;
+        currentPowershot = -1;
+        lastL = false;
 
         bucket.setIntaking();
 
@@ -95,7 +95,7 @@ public class Tele extends LinearOpMode
 
             if(gamepad1.left_bumper){
                 state = State.POWERSHOT;
-                shooter.spinUp();
+                shooter.spinPowershots();
                 bucket.setShooting();
             }
 
@@ -149,7 +149,7 @@ public class Tele extends LinearOpMode
             }
             else if(state == State.SHOOTING)
             {
-                dtValues = aim.track(Positions.goalX, Positions.goalY, spotX, spotY, distanceOffset, sidewaysOffset, 21.6);
+                dtValues = aim.track(Positions.goalX, Positions.goalY, spotX, spotY, distanceOffset, sidewaysOffset, 22.1);
 
                 bucket.index((gamepad1.right_trigger >= .3));
             }
@@ -170,15 +170,18 @@ public class Tele extends LinearOpMode
                     goalPosY = Positions.psLeftY;
                 }
 
-                dtValues = aim.track(goalPosX, goalPosY, psSpotX, psSpotY, distanceOffset, sidewaysOffset, 20.0);
+                dtValues = aim.track(goalPosX, goalPosY, psSpotX, psSpotY, distanceOffset, sidewaysOffset, 14.0);
 
-                if(bucket.index((gamepad1.right_trigger >= .3))){
+                bucket.index(gamepad1.right_trigger >= .3);
+                boolean l = gamepad1.left_bumper;
+                if(l && !lastL){
                     currentPowershot++;
                 }
                 if(currentPowershot > 2){
                     currentPowershot = 0;
                 }
-                lastTrigger = gamepad1.right_trigger;
+                lastL = l;
+                telemetry.addData("PS:  ", currentPowershot);
             }
 
             double x = gamepad1.left_stick_x * 1.5;
@@ -221,27 +224,29 @@ public class Tele extends LinearOpMode
             lastX = buttonx;
 
             if(gamepad1.dpad_up && !lastDpad){
-                distanceOffset += .1;
+                dt.getPosition().x = dt.getPosition().x - 20;
                 lastDpad = true;
             }
             else if(gamepad1.dpad_down && !lastDpad){
-                distanceOffset -= .1;
+                dt.getPosition().x = dt.getPosition().x +  20;
                 lastDpad = true;
             }
             else if(gamepad1.dpad_right && !lastDpad){
-                sidewaysOffset -= Math.toRadians(2);
+                dt.getPosition().y = dt.getPosition().y + 15;
                 lastDpad = true;
             }
             else if(gamepad1.dpad_left && !lastDpad){
-                sidewaysOffset += Math.toRadians(2);
+                dt.getPosition().y = dt.getPosition().y - 15;
                 lastDpad = true;
-            }else{
+            }
+
+            if(!gamepad1.dpad_left && !gamepad1.dpad_right && !gamepad1.dpad_down && !gamepad1.dpad_up){
                 lastDpad = false;
             }
 
             telemetry.addData("Hz: ", looptime);
-            bulk.tick(false, true);
-            telemetry.addData("shooter: ", shooter.getShooterVelo());
+            //bulk.tick(false, true);
+            //telemetry.addData("shooter: ", shooter.getShooterVelo());
             telemetry.addData("H ERROR: ", Math.toDegrees(dtValues[3]));
             telemetry.addData("x: ", dt.getPosition().x);
             telemetry.addData("y: ", dt.getPosition().y);

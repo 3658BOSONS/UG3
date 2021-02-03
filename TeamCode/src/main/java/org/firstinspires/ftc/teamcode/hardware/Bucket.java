@@ -29,7 +29,7 @@ public class Bucket {
 
     private final int resetTime = 80;
     private final int pushTime = 80;
-    private final int raiseTime = 250;
+    private final int raiseTime = 300;
 
     public Bucket(LinearOpMode opMode){
         orange = opMode.hardwareMap.get(Servo.class, "borange");

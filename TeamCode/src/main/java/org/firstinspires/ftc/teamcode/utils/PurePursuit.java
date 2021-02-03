@@ -13,14 +13,21 @@ public class PurePursuit //class declaration
     private int currentPoint; //current point in iteration
     private int currentPointHeading;
 
-    private final int lookahead = 400;
-    private final int lookaheadHeading = 600;
+    private int lookahead = 400;
+    private int lookaheadHeading = 600;
 
     public PurePursuit(ArrayList<MovementPoint> points)
     {
         this.points = points;
         this.currentPoint = 1;
         this.currentPointHeading = 1;
+    }
+
+    public void setLookahead(int lookahead){
+        this.lookahead = lookahead;
+    }
+    public void setLookaheadHeading(int lookaheadHeading){
+        this.lookaheadHeading = lookaheadHeading;
     }
 
     public boolean purePursuit(Drivetrain dt, OpMode op, double speed, double turnSpeed, int reverse)

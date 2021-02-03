@@ -17,7 +17,7 @@ public class ShooterTuner  extends LinearOpMode {
     private BulkReadHandler bulk;
     private FtcDashboard dashboard;
 
-    public static double P = 100;
+    public static double P = 150;
     public static double I = 4;
     public static double D = 1;
 
@@ -51,7 +51,7 @@ public class ShooterTuner  extends LinearOpMode {
             bulk.tick(false, true);
             TelemetryPacket packet = new TelemetryPacket();
             packet.put("VELO: ", shooter.getShooterVelo());
-            packet.put("TARGET: ", 8500);
+            packet.put("TARGET: ", 5600);
             dashboard.sendTelemetryPacket(packet);
         }
 

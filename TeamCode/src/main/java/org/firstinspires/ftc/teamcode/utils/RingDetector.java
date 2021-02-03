@@ -69,11 +69,11 @@ class Pipeline extends OpenCvPipeline
 
     private Telemetry telemetry;
     private final Scalar lowerOrange = new Scalar(0.0, 141.0, 0.0);
-    private final Scalar upperOrange = new Scalar(255.0, 230.0, 115.0);
+    private final Scalar upperOrange = new Scalar(255.0, 235.0, 90.0);
     private final int CAMERA_WIDTH = 320;
-    private final int HORIZON = (int) (140.0 / 320.0 * (double) CAMERA_WIDTH);
+    private final int HORIZON = (int) (160.0 / 320.0 * (double) CAMERA_WIDTH);
     private final int MIN_WIDTH = (int) (50.0 / 320.0 * (double) CAMERA_WIDTH);
-    private final double BOUND_RATIO = 0.8;
+    private final double BOUND_RATIO = 0.73;
 
     private Mat mat;
     private Mat ret;
