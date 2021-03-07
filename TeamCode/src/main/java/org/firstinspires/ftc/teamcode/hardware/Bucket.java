@@ -11,7 +11,7 @@ public class Bucket {
     private final double mag2 = .53;
     private final double magUp = .645;
     private final double rotDown = .7;
-    private final double rotUp = .53;
+    private final double rotUp = .52;
     private final double rotMiddle = .6;
     private final double indexIn = .65;
     private final double indexOut = .5;

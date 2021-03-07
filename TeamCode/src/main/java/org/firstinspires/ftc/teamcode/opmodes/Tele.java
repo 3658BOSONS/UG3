@@ -22,7 +22,6 @@ public class Tele extends LinearOpMode
     private Drivetrain dt;
     private Intake intake;
     private Shooter shooter;
-    private Bucket bucket;
     private Wobble wobble;
 
     private BulkReadHandler bulk;
@@ -50,6 +49,9 @@ public class Tele extends LinearOpMode
     private double distanceOffset;
     private double sidewaysOffset;
 
+    private double lastRight;
+    private int lastIndex;
+
     @Override
     public void runOpMode()
     {
@@ -58,7 +60,6 @@ public class Tele extends LinearOpMode
         dt = new Drivetrain(this);
         intake = new Intake(this);
         shooter = new Shooter(this);
-        bucket = new Bucket(this);
         wobble = new Wobble(false, this);
 
         dt.getPosition().x = dt.xOffset;
@@ -73,16 +74,16 @@ public class Tele extends LinearOpMode
         distanceOffset = 0;
         sidewaysOffset = 0;
 
+        lastRight = 0;
+        lastIndex = 0;
+
         lastX = false;
         isGripping = false;
 
         currentPowershot = -1;
         lastL = false;
 
-        bucket.setIntaking();
-
         bulk = new BulkReadHandler(this);
-        shooter.resetTurretEncoder();
 
         while(opModeIsActive())
         {
@@ -96,33 +97,34 @@ public class Tele extends LinearOpMode
             if(gamepad1.left_bumper){
                 state = State.POWERSHOT;
                 shooter.spinPowershots();
-                bucket.setShooting();
+                shooter.setReleased();
             }
 
             if(bumper && !lastBumper)
             {
                 if(state == State.INTAKING)
                 {
-                    bucket.setHolding();
+                    shooter.setAngle(22);
+                    shooter.setHolding();
                     state = State.HOLDING;
                     wobble.lowerArm();
                 }
                 else if(state == State.HOLDING)
                 {
                     shooter.spinUp();
-                    bucket.setShooting();
+                    shooter.setReleased();
                     state = State.SHOOTING;
                 }
                 else if(state == State.SHOOTING)
                 {
                     shooter.cutPower();
-                    bucket.setIntaking();
+                    shooter.setAngle(-10);
                     state = State.INTAKING;
                     wobble.raiseArm();
                 }
                 else if(state == State.POWERSHOT){
                     shooter.cutPower();
-                    bucket.setIntaking();
+                    shooter.setAngle(-10);
                     state = State.INTAKING;
                     wobble.raiseArm();
                 }
@@ -134,24 +136,27 @@ public class Tele extends LinearOpMode
             if(state == State.INTAKING)
             {
                 intake.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
-                shooter.setTurretAngle(0);
                 turretTarget = 0;
-                bucket.reverseOrange(gamepad1.b);
             }
             else if(state == State.HOLDING)
             {
-                boolean b = gamepad1.b;
-                if(b && !lastB)
-                {
-                    bucket.unJamBucket();
-                }
-                lastB = b;
+
             }
             else if(state == State.SHOOTING)
             {
-                dtValues = aim.track(Positions.goalX, Positions.goalY, spotX, spotY, distanceOffset, sidewaysOffset, 22.1);
+                dtValues = aim.track(Positions.goalX, Positions.goalY, spotX, spotY, distanceOffset, sidewaysOffset, 24.6);
 
-                bucket.index((gamepad1.right_trigger >= .3));
+                double right = gamepad1.right_trigger;
+                if(right >= .3 && lastRight < .2){
+                    if(lastIndex == 0){
+                        shooter.setIndexerPos(3);
+                        lastIndex = 3;
+                    }else{
+                        shooter.setIndexerPos(0);
+                        lastIndex = 0;
+                    }
+                }
+                lastRight = right;
             }
             else if(state == State.POWERSHOT)
             {
@@ -170,9 +175,27 @@ public class Tele extends LinearOpMode
                     goalPosY = Positions.psLeftY;
                 }
 
-                dtValues = aim.track(goalPosX, goalPosY, psSpotX, psSpotY, distanceOffset, sidewaysOffset, 14.0);
+                dtValues = aim.track(goalPosX, goalPosY, psSpotX, psSpotY, distanceOffset, sidewaysOffset, 0);
 
-                bucket.index(gamepad1.right_trigger >= .3);
+                double right = gamepad1.right_trigger;
+                if(right >= .3 && lastRight < .2){
+                    if(lastIndex == 0){
+                        shooter.setIndexerPos(3);
+                        lastIndex = 1;
+                    }else if (lastIndex == 1){
+                        shooter.setIndexerPos(2);
+                        lastIndex = 2;
+                    }
+                    else if (lastIndex == 2){
+                        shooter.setIndexerPos(3);
+                        lastIndex = 3;
+                    }
+                    else{
+                        shooter.setIndexerPos(0);
+                        lastIndex = 0;
+                    }
+                }
+                lastRight = right;
                 boolean l = gamepad1.left_bumper;
                 if(l && !lastL){
                     currentPowershot++;
@@ -201,7 +224,6 @@ public class Tele extends LinearOpMode
                 dt.getPosition().x = 455/2;
                 dt.getPosition().y = 455/2;
                 dt.getPosition().heading = 0;
-                shooter.resetTurretEncoder();
             }
 
             if(gamepad1.a){

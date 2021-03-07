@@ -40,6 +40,7 @@ public class RedAuto extends LinearOpMode
     private BulkReadHandler bulk;
 
     private ElapsedTime timer;
+    private final double angle = 24.6;
 
     private boolean powerShots;
     private int cPath;
@@ -376,7 +377,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 1000){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, 22.2);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             bucket.setShooting();
@@ -384,7 +385,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, 22.2);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             timer.reset();
@@ -541,7 +542,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, 21.9);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             bucket.setShooting();
@@ -550,7 +551,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, 21.9);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             dt.drive(0,0,0);
@@ -559,7 +560,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 700){
                 bucket.index(true);
                 bulk.tick(true, false);
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, 21.9);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
                 dt.track();
             }
@@ -617,7 +618,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 1000){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, 21.9);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             timer.reset();
@@ -625,7 +626,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 1100){
                 bucket.index(true);
                 bulk.tick(true, false);
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, 21.9);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
                 dt.track();
             }

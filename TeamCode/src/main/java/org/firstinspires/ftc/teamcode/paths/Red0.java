@@ -23,7 +23,7 @@ public class Red0
         ArrayList<MovementPoint> points2 = new ArrayList<>();
         points2.add(new MovementPoint(2400, 900, 0));
         points2.add(new MovementPoint(1200, 550, 0));
-        points2.add(new MovementPoint(825, 350, Math.toRadians(-170), 15));
+        points2.add(new MovementPoint(825, 300, Math.toRadians(-170), 15));
         PurePursuit path2 = new PurePursuit(points2);
         paths.add(path2);
 

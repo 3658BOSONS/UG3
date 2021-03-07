@@ -34,15 +34,10 @@ public class AutoAimer
         double distanceToGoal = Math.hypot(xToGoal, yToGoal);
         double angleToGoal = Math.atan2(yToGoal, xToGoal);
         double dtAngle = BosonMath.clipAngle(dt.getPosition().heading);
-        if(c%5 == 0){
-            shooter.setTurretAngle(angleToGoal - dtAngle + Math.toRadians(headingOffset));
-        }
 
-        if(Math.abs(angleToGoal - dtAngle + Math.toRadians(headingOffset)) > .75){
-            heading.setTarget(angleToGoal - dtAngle + Math.toRadians(headingOffset));
-            dtValues[2] = heading.tick(dtAngle);
-        }
-        dtValues[3] =  BosonMath.clipAngle(shooter.getTurretAngle() + dt.getPosition().heading - Math.toRadians(headingOffset)) - angleToGoal;
+        heading.setTarget(angleToGoal - dtAngle + Math.toRadians(headingOffset));
+        dtValues[2] = heading.tick(dtAngle);
+        dtValues[3] =  BosonMath.clipAngle(dt.getPosition().heading - Math.toRadians(headingOffset)) - angleToGoal;
 
         translation.setTarget(Math.hypot(posX, posY));
         dtValues[1] = Math.abs(translation.tick(Math.hypot(dt.getPosition().x, dt.getPosition().y)));
@@ -51,7 +46,7 @@ public class AutoAimer
         double angleToSpot = Math.atan2(yToSpot, xToSpot);
         dtValues[0] = angleToSpot + Math.PI/2 - dt.getPosition().heading;
 
-        shooter.setAngle((1.0/380.0)*distanceToGoal + angleIntercept + angleOffset);
+        shooter.setAngle(22);
 
         c++;
         return dtValues;
