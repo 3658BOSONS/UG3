@@ -21,7 +21,7 @@ public class AutoAimer
         this.shooter = shooter;
 
         translation = new PIDF(.01, 0,.5, 0);
-        heading = new PIDF(4, 0, 25, 0);
+        heading = new PIDF(2, 0, 10, 0);
 
         c = 0;
     }
@@ -46,7 +46,7 @@ public class AutoAimer
         double angleToSpot = Math.atan2(yToSpot, xToSpot);
         dtValues[0] = angleToSpot + Math.PI/2 - dt.getPosition().heading;
 
-        shooter.setAngle(22);
+        shooter.setAngle(27 + angleIntercept);
 
         c++;
         return dtValues;

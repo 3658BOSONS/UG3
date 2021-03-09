@@ -26,8 +26,8 @@ public class TWT extends LinearOpMode {
         waitForStart();
 
         dt = new Drivetrain(this);
-        left = new OdoWheel(true, 58, new Motor(this, "br"));
-        right = new OdoWheel(false, 58, new Motor(this, "fr"));
+        left = new OdoWheel(false, 58, new Motor(this, "fl"));
+        right = new OdoWheel(false, 58, new Motor(this, "br"));
         gyro = new Gyro(this);
         bulk = new BulkReadHandler(this);
 
@@ -39,6 +39,9 @@ public class TWT extends LinearOpMode {
             double trackWidth = (right.getMM() - left.getMM()) / angle;
 
             telemetry.clear();
+            telemetry.addData("l " , left.getMM());
+            telemetry.addData("r " , right.getMM());
+            telemetry.addData("gyro", gyro.getAngle());
             telemetry.addData("TW: ", trackWidth);
             telemetry.update();
         }

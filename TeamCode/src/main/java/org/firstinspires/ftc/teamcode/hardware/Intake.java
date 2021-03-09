@@ -1,23 +1,29 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 
 public class Intake {
 
-    private Motor front;
-    private Motor in;
+    private Motor intake;
+    private Servo deploy;
+
+    private final double deployIn = .1;
+    private final double deployOut = .9;
 
     public Intake(LinearOpMode opMode){
-        front = new Motor(opMode, "ifront");
-        in = new Motor(opMode, "iinner");
+        intake = new Motor(opMode, "intake");
+        deploy = opMode.hardwareMap.get(Servo.class, "deploy");
+        deploy.setPosition(deployIn);
+        intake.setConstants(false, false, true, true);
+    }
 
-        front.setConstants(false, false, true, true);
-        in.setConstants(false, false, true, true);
+    public void deployIntake(){
+        deploy.setPosition(deployOut);
     }
 
     public void setPower(double power){
-        front.setPower(power);
-        in.setPower(power);
+        intake.setPower(power);
     }
 
 }

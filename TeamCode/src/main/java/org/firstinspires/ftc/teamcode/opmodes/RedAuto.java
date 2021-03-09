@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.hardware.Bucket;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Shooter;
@@ -31,7 +30,6 @@ public class RedAuto extends LinearOpMode
     private Drivetrain dt;
     private Wobble wobble;
     private Shooter shooter;
-    private Bucket bucket;
     private Intake intake;
 
     private AutoAimer aim;
@@ -57,9 +55,7 @@ public class RedAuto extends LinearOpMode
     {
         dt = new Drivetrain(this);
         wobble = new Wobble(true, this);
-        shooter = new Shooter(this);
-        bucket = new Bucket(this);
-        intake = new Intake(this);
+        shooter = new Shooter(this);        intake = new Intake(this);
 
         aim = new AutoAimer(dt, shooter);
 
@@ -79,14 +75,11 @@ public class RedAuto extends LinearOpMode
         lPath = 0;
         lPoint = 0;
 
-        bucket.setShooting();
-        bucket.deactivateOrange();
+        shooter.setHolding();
+        shooter.setAngle(28);
         dt.getPosition().x = 230;
         dt.getPosition().y = 990;
         dt.resetEncoder();
-        shooter.setAngle(22);
-        shooter.setTurretAngle(0);
-        shooter.setAngleGround();
 
         ArrayList<MovementPoint> psDrive = new ArrayList<>();
         psDrive.add(new MovementPoint(450, 1000, 0));
@@ -97,9 +90,9 @@ public class RedAuto extends LinearOpMode
 
         waitForStart();
 
-        shooter.resetTurretEncoder();
         int rings = detector.getDecision();
         detector.stopStreaming();
+        intake.deployIntake();
 
         while(opModeIsActive())
         {
@@ -136,55 +129,59 @@ public class RedAuto extends LinearOpMode
         }
         else{
             timer.reset();
-            bucket.setShooting();
             shooter.spinPowershots();
-            while(opModeIsActive() && timer.milliseconds() < 2000){
+            shooter.setReleased();
+            while(opModeIsActive() && timer.milliseconds() < 1750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] drive = aim.track(Positions.psRightX, Positions.psRightY, 1500, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psRightX, Positions.psRightY, 1600, 1300, 0, 0, -1.5);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
+            shooter.setIndexerPos(1);
             timer.reset();
             while(opModeIsActive() && timer.milliseconds() < 300){
                 bulk.tick(true, false);
                 dt.track();
-                bucket.index(true);
-                double[] drive = aim.track(Positions.psRightX, Positions.psRightY, 1500, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psRightX, Positions.psRightY, 1600, 1300, 0, 0, -1.5);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
-
-            while(opModeIsActive() && timer.milliseconds() < 1000){
+            while(opModeIsActive() && timer.milliseconds() < 800){
                 bulk.tick(true, false);
                 dt.track();
-                double[] drive = aim.track(Positions.psMidX, Positions.psMidY, 1500, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psMidX, Positions.psMidY, 1600, 1300, 0, 0, -1.5);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
+            shooter.setIndexerPos(2);
             timer.reset();
-            while(opModeIsActive() && timer.milliseconds() < 300){
+            while(opModeIsActive() && timer.milliseconds() < 400){
                 bulk.tick(true, false);
                 dt.track();
-                bucket.index(true);
-                double[] drive = aim.track(Positions.psMidX, Positions.psMidY, 1500, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psMidX, Positions.psMidY, 1600, 1300, 0, 0, -1.5);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
-
-            while(opModeIsActive() && timer.milliseconds() < 1000){
+            while(opModeIsActive() && timer.milliseconds() < 800){
                 bulk.tick(true, false);
                 dt.track();
-                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1500, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1600, 1300, 0, 0, -1.5);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
+            shooter.setIndexerPos(3);
             timer.reset();
-            while(opModeIsActive() && timer.milliseconds() < 300){
+            while(opModeIsActive() && timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                bucket.index(true);
-                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1500, 1300, 0, 0, 0);
+                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1600, 1300, 0, 0, -1.5);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
+            shooter.setIndexerPos(0);
+            timer.reset();
+            while(timer.milliseconds() < 500){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            shooter.setAngle(-10);
+            shooter.cutPower();
             powerShots = true;
-            bucket.setIntaking();
-            shooter.setTurretAngle(0);
             shooter.cutPower();
             cPath = 0;
         }
@@ -203,19 +200,7 @@ public class RedAuto extends LinearOpMode
         {
             wobble.lowerArm();
             timer.reset();
-            while(timer.milliseconds() < 400){
-                bulk.tick(true, false);
-                dt.track();
-            }
-            wobble.raiseArm();
-            timer.reset();
-            while(timer.milliseconds() < 100){
-                bulk.tick(true, false);
-                dt.track();
-            }
-            wobble.lowerArm();
-            timer.reset();
-            while(timer.milliseconds() < 500){
+            while(timer.milliseconds() < 800){
                 bulk.tick(true, false);
                 dt.track();
             }
@@ -285,8 +270,11 @@ public class RedAuto extends LinearOpMode
                 dt.track();
             }
             dt.drive(0, 0, 0);
-            dt.setOffsets(dt.getPosition().x, dt.getPosition().y, dt.getPosition().heading);
-            while(opModeIsActive());
+            while(opModeIsActive()){
+                bulk.tick(true, false);
+                dt.trackWithoutOffsets();
+                dt.setOffsets(dt.getPosition().x, dt.getPosition().y, dt.getPosition().heading);
+            }
         }
 
         lPath = cPath;
@@ -306,19 +294,7 @@ public class RedAuto extends LinearOpMode
         {
             wobble.lowerArm();
             timer.reset();
-            while(timer.milliseconds() < 400){
-                bulk.tick(true, false);
-                dt.track();
-            }
-            wobble.raiseArm();
-            timer.reset();
-            while(timer.milliseconds() < 75){
-                bulk.tick(true, false);
-                dt.track();
-            }
-            wobble.lowerArm();
-            timer.reset();
-            while(timer.milliseconds() < 500){
+            while(timer.milliseconds() < 800){
                 bulk.tick(true, false);
                 dt.track();
             }
@@ -371,31 +347,32 @@ public class RedAuto extends LinearOpMode
                 dt.track();
             }
             intake.setPower(0);
-            bucket.setHolding();
+            shooter.setHolding();
+            shooter.waitThenRaiseChute();
             shooter.spinUp();
             timer.reset();
             while(timer.milliseconds() < 1000){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
-            bucket.setShooting();
+            shooter.setReleased();
             timer.reset();
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
+            shooter.setIndexerPos(3);
             timer.reset();
-            while(timer.milliseconds() < 300){
-                bucket.index(true);
+            while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
             }
             shooter.cutPower();
-            bucket.setIntaking();
+            shooter.setIndexerPos(0);
         }
         if(cPath == 3){
             if(onering.getPaths().get(cPath).purePursuit(dt, this, .75, 1, 0)){
@@ -427,9 +404,11 @@ public class RedAuto extends LinearOpMode
                 dt.track();
             }
             dt.drive(0, 0, 0);
-
-            dt.setOffsets(dt.getPosition().x, dt.getPosition().y, dt.getPosition().heading);
-            while(opModeIsActive());
+            while(opModeIsActive()){
+                bulk.tick(true, false);
+                dt.trackWithoutOffsets();
+                dt.setOffsets(dt.getPosition().x, dt.getPosition().y, dt.getPosition().heading);
+            }
         }
 
         lPath = cPath;
@@ -449,19 +428,7 @@ public class RedAuto extends LinearOpMode
         {
             wobble.lowerArm();
             timer.reset();
-            while(timer.milliseconds() < 400){
-                bulk.tick(true, false);
-                dt.track();
-            }
-            wobble.raiseArm();
-            timer.reset();
-            while(timer.milliseconds() < 75){
-                bulk.tick(true, false);
-                dt.track();
-            }
-            wobble.lowerArm();
-            timer.reset();
-            while(timer.milliseconds() < 500){
+            while(timer.milliseconds() < 800){
                 bulk.tick(true, false);
                 dt.track();
             }
@@ -517,11 +484,7 @@ public class RedAuto extends LinearOpMode
             }
         }
         if(cPath == 4 && lPath == 3){
-            timer.reset();
-            while(timer.milliseconds() < 500){
-                bulk.tick(true, false);
-                dt.track();
-            }
+
         }
         if(cPath == 4){
             if(fourring.getPaths().get(cPath).purePursuit(dt, this, .4, 1, 0)){
@@ -530,42 +493,50 @@ public class RedAuto extends LinearOpMode
         }
         if(cPath == 5 && lPath == 4){
             timer.reset();
-            while(timer.milliseconds() < 1000){
+            while(timer.milliseconds() < 500){
                 bulk.tick(true, false);
                 dt.track();
             }
-            intake.setPower(0);
-            bucket.setHolding();
+            shooter.setHolding();
+            shooter.waitThenRaiseChute();
+            timer.reset();
+            while(timer.milliseconds() < 250){
+                bulk.tick(true, false);
+                dt.track();
+            }
             shooter.spinUp();
-            bucket.unJamBucket();
+            intake.setPower(-.2);
             timer.reset();
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
-            bucket.setShooting();
+            shooter.setReleased();
             timer.reset();
-            wobble.lowerALittle();
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
-            dt.drive(0,0,0);
             timer.reset();
-            bucket.resetIndexing();
-            while(timer.milliseconds() < 700){
-                bucket.index(true);
+            shooter.setIndexerPos(3);
+            while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
                 dt.track();
             }
             shooter.cutPower();
-            bucket.setIntaking();
+            shooter.setIndexerPos(0);
+            timer.reset();
+            while(timer.milliseconds() < 300){
+                bulk.tick(true, false);
+                dt.track();
+            }
+            shooter.setAngle(-10);
             timer.reset();
             while(timer.milliseconds() < 500){
                 bulk.tick(true, false);
@@ -603,43 +574,45 @@ public class RedAuto extends LinearOpMode
                 dt.track();
                 dt.drive(-Math.PI/2, 1, 0);
             }
-            bucket.setHolding();
+            shooter.setHolding();
+            shooter.waitThenRaiseChute();
             shooter.spinUp();
-            bucket.unJamBucket();
             timer.reset();
-            RobotMovement.setPoint(new MovementPoint(1600, 850, 25), 1, 1);
+            RobotMovement.setPoint(new MovementPoint(1700, 850, 25), .75, 1);
             while(!RobotMovement.driveTowardPoint(dt, telemetry, true, 1)){
                 bulk.tick(true, false);
                 dt.track();
             }
             dt.drive(0,0,0);
-            bucket.setShooting();
+            shooter.setReleased();
             timer.reset();
             while(timer.milliseconds() < 1000){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             timer.reset();
-            bucket.resetIndexing();
-            while(timer.milliseconds() < 1100){
-                bucket.index(true);
+            shooter.setIndexerPos(3);
+            while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, 0, 0, angle);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, angle);
                 dt.drive(powers[0], powers[1], powers[2]);
                 dt.track();
             }
             shooter.cutPower();
-            bucket.setIntaking();
+            shooter.setIndexerPos(0);
             RobotMovement.setPoint(new MovementPoint(1700, 850, 50), 1, 1);
             while(!RobotMovement.driveTowardPoint(dt, telemetry, true, 0) && opModeIsActive()){
                 bulk.tick(true, false);
                 dt.track();
             }
             dt.drive(0, 0, 0);
-            dt.setOffsets(dt.getPosition().x, dt.getPosition().y, dt.getPosition().heading);
-            while(opModeIsActive());
+            while(opModeIsActive()){
+                bulk.tick(true, false);
+                dt.trackWithoutOffsets();
+                dt.setOffsets(dt.getPosition().x, dt.getPosition().y, dt.getPosition().heading);
+            }
         }
 
         lPath = cPath;

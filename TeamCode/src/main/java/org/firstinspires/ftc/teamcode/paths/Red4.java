@@ -22,8 +22,8 @@ public class Red4
 
         ArrayList<MovementPoint> points2 = new ArrayList<>();
         points2.add(new MovementPoint(2900, 600, 0));
-        points2.add(new MovementPoint(1500, 300, 0));
-        points2.add(new MovementPoint(900, 375, Math.toRadians(180), 15));
+        points2.add(new MovementPoint(1500, 250, 0));
+        points2.add(new MovementPoint(925, 325, Math.toRadians(180), 15));
         paths.add(new PurePursuit(points2));
 
         ArrayList<MovementPoint> points3 = new ArrayList<>();
@@ -42,8 +42,8 @@ public class Red4
         paths.add(new PurePursuit(points5));
 
         ArrayList<MovementPoint> points6 = new ArrayList<>();
-        points6.add(new MovementPoint(1800, 1000, 0));
-        points6.add(new MovementPoint(2800, 900, 0));
+        points6.add(new MovementPoint(1700, 850, 0));
+        points6.add(new MovementPoint(2800, 800, 0));
         points6.add(new MovementPoint(3100, 800, Math.toRadians(-45), 25));
         paths.add(new PurePursuit(points6));
     }

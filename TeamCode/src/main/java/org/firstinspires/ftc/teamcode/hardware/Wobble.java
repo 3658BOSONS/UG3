@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Wobble {
 
-    private final double down = .15;
-    private final double aboveWall = .7;
-    private final double init = .95;
+    private final double down = .25;
+    private final double aboveWall = .8;
+    private final double init = 1;
     private final double gripping = .45;
     private final double open = .16;
 
@@ -38,6 +38,9 @@ public class Wobble {
     }
     public void raiseArm(){
         rotate.setPosition(aboveWall);
+    }
+    public void resetArm(){
+        rotate.setPosition(init);
     }
     public void lowerALittle(){
         rotate.setPosition(.35);

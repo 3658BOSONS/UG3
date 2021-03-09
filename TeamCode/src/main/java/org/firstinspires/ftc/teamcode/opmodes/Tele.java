@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.hardware.Bucket;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Shooter;
@@ -37,10 +36,10 @@ public class Tele extends LinearOpMode
     private boolean isGripping;
     private boolean lastDpad;
 
-    private double spotX = 1400;
+    private double spotX = 1700;
     private double spotY = 850;
 
-    private double psSpotX = 1500;
+    private double psSpotX = 1600;
     private double psSpotY = 1300;
 
     private int currentPowershot;
@@ -61,11 +60,13 @@ public class Tele extends LinearOpMode
         intake = new Intake(this);
         shooter = new Shooter(this);
         wobble = new Wobble(false, this);
+        wobble.resetArm();
 
         dt.getPosition().x = dt.xOffset;
         dt.getPosition().y = dt.yOffset;
 
         aim = new AutoAimer(dt, shooter);
+        shooter.cutPower();
 
         state = State.INTAKING;
         lastBumper = false;
@@ -104,10 +105,9 @@ public class Tele extends LinearOpMode
             {
                 if(state == State.INTAKING)
                 {
-                    shooter.setAngle(22);
+                    shooter.waitThenRaiseChute();
                     shooter.setHolding();
                     state = State.HOLDING;
-                    wobble.lowerArm();
                 }
                 else if(state == State.HOLDING)
                 {
@@ -120,13 +120,13 @@ public class Tele extends LinearOpMode
                     shooter.cutPower();
                     shooter.setAngle(-10);
                     state = State.INTAKING;
-                    wobble.raiseArm();
+                    wobble.resetArm();
                 }
                 else if(state == State.POWERSHOT){
                     shooter.cutPower();
                     shooter.setAngle(-10);
                     state = State.INTAKING;
-                    wobble.raiseArm();
+                    wobble.resetArm();
                 }
             }
 
@@ -144,17 +144,13 @@ public class Tele extends LinearOpMode
             }
             else if(state == State.SHOOTING)
             {
-                dtValues = aim.track(Positions.goalX, Positions.goalY, spotX, spotY, distanceOffset, sidewaysOffset, 24.6);
+                dtValues = aim.track(Positions.goalX, Positions.goalY, spotX, spotY, distanceOffset, sidewaysOffset, 0);
 
                 double right = gamepad1.right_trigger;
-                if(right >= .3 && lastRight < .2){
-                    if(lastIndex == 0){
-                        shooter.setIndexerPos(3);
-                        lastIndex = 3;
-                    }else{
-                        shooter.setIndexerPos(0);
-                        lastIndex = 0;
-                    }
+                if(right >= .3){
+                    shooter.setIndexerPos(3);
+                }else{
+                    shooter.setIndexerPos(0);
                 }
                 lastRight = right;
             }
@@ -175,23 +171,19 @@ public class Tele extends LinearOpMode
                     goalPosY = Positions.psLeftY;
                 }
 
-                dtValues = aim.track(goalPosX, goalPosY, psSpotX, psSpotY, distanceOffset, sidewaysOffset, 0);
+                dtValues = aim.track(goalPosX, goalPosY, psSpotX, psSpotY, distanceOffset, sidewaysOffset, -1.5);
 
                 double right = gamepad1.right_trigger;
                 if(right >= .3 && lastRight < .2){
                     if(lastIndex == 0){
-                        shooter.setIndexerPos(3);
+                        shooter.setIndexerPos(1);
                         lastIndex = 1;
                     }else if (lastIndex == 1){
                         shooter.setIndexerPos(2);
                         lastIndex = 2;
                     }
                     else if (lastIndex == 2){
-                        shooter.setIndexerPos(3);
-                        lastIndex = 3;
-                    }
-                    else{
-                        shooter.setIndexerPos(0);
+                        shooter.extendThenRetract();
                         lastIndex = 0;
                     }
                 }
@@ -207,6 +199,7 @@ public class Tele extends LinearOpMode
                 telemetry.addData("PS:  ", currentPowershot);
             }
 
+            //dtValues = new double[]{0,0,0,0}; //OVERRIDE AUTOAIM**********
             double x = gamepad1.left_stick_x * 1.5;
             double y = -gamepad1.left_stick_y;
             if(gamepad1.right_stick_x != 0)
@@ -254,12 +247,20 @@ public class Tele extends LinearOpMode
                 lastDpad = true;
             }
             else if(gamepad1.dpad_right && !lastDpad){
-                dt.getPosition().y = dt.getPosition().y + 15;
-                lastDpad = true;
+                if(gamepad1.left_trigger > .3){
+                    dt.headingOffset -= Math.toRadians(1);
+                }else{
+                    dt.getPosition().y = dt.getPosition().y + 15;
+                    lastDpad = true;
+                }
             }
             else if(gamepad1.dpad_left && !lastDpad){
-                dt.getPosition().y = dt.getPosition().y - 15;
-                lastDpad = true;
+                if(gamepad1.left_trigger > .3){
+                    dt.headingOffset += Math.toRadians(1);
+                }else{
+                    dt.getPosition().y = dt.getPosition().y - 15;
+                    lastDpad = true;
+                }
             }
 
             if(!gamepad1.dpad_left && !gamepad1.dpad_right && !gamepad1.dpad_down && !gamepad1.dpad_up){

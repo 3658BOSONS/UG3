@@ -51,7 +51,7 @@ public class ShooterTuner  extends LinearOpMode {
             bulk.tick(false, true);
             TelemetryPacket packet = new TelemetryPacket();
             packet.put("VELO: ", shooter.getShooterVelo());
-            packet.put("TARGET: ", 5600);
+            packet.put("TARGET: ", 4000);
             dashboard.sendTelemetryPacket(packet);
         }
 
