@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.utils.Pose;
 
 public class Drivetrain {
@@ -55,6 +56,14 @@ public class Drivetrain {
         xOffset = x;
         yOffset = y;
         headingOffset = heading;
+    }
+
+    public void readPose(Telemetry t){
+        t.clear();
+        t.addData("X ", position.x);
+        t.addData("Y ", position.y);
+        t.addData("H ", Math.toDegrees(position.heading));
+        t.update();
     }
 
     public void drive(double theta, double power, double turn){

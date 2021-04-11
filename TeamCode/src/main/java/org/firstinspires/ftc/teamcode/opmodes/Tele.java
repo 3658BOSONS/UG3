@@ -10,8 +10,10 @@ import org.firstinspires.ftc.teamcode.hardware.Wobble;
 import org.firstinspires.ftc.teamcode.utils.AutoAimer;
 import org.firstinspires.ftc.teamcode.utils.BosonMath;
 import org.firstinspires.ftc.teamcode.utils.BulkReadHandler;
+import org.firstinspires.ftc.teamcode.utils.MovementPoint;
 import org.firstinspires.ftc.teamcode.utils.PIDF;
 import org.firstinspires.ftc.teamcode.utils.Positions;
+import org.firstinspires.ftc.teamcode.utils.RobotMovement;
 import org.firstinspires.ftc.teamcode.utils.State;
 
 @TeleOp(name="TeleopRed", group = "Tele")
@@ -30,8 +32,6 @@ public class Tele extends LinearOpMode
     private AutoAimer aim;
 
     private boolean lastBumper;
-    private boolean lastB;
-    private double turretTarget;
     private boolean lastX;
     private boolean isGripping;
     private boolean lastDpad;
@@ -70,7 +70,6 @@ public class Tele extends LinearOpMode
 
         state = State.INTAKING;
         lastBumper = false;
-        turretTarget = 0;
 
         distanceOffset = 0;
         sidewaysOffset = 0;
@@ -136,7 +135,6 @@ public class Tele extends LinearOpMode
             if(state == State.INTAKING)
             {
                 intake.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
-                turretTarget = 0;
             }
             else if(state == State.HOLDING)
             {
@@ -144,6 +142,14 @@ public class Tele extends LinearOpMode
             }
             else if(state == State.SHOOTING)
             {
+
+                double distToPoint = Math.hypot(spotX - dt.getPosition().x, spotY - dt.getPosition().y);
+
+                if(distToPoint > 100){
+                    RobotMovement.setPoint(new MovementPoint(spotX, spotY, 50), 1, 1);
+                    RobotMovement.driveTowardPoint(dt, telemetry, true, 1);
+                }
+
                 dtValues = aim.track(Positions.goalX, Positions.goalY, spotX, spotY, distanceOffset, sidewaysOffset, 0);
 
                 double right = gamepad1.right_trigger;
@@ -171,7 +177,7 @@ public class Tele extends LinearOpMode
                     goalPosY = Positions.psLeftY;
                 }
 
-                dtValues = aim.track(goalPosX, goalPosY, psSpotX, psSpotY, distanceOffset, sidewaysOffset, -1.5);
+                dtValues = aim.track(goalPosX, goalPosY, psSpotX, psSpotY, distanceOffset, sidewaysOffset, -.5);
 
                 double right = gamepad1.right_trigger;
                 if(right >= .3 && lastRight < .2){
@@ -249,6 +255,7 @@ public class Tele extends LinearOpMode
             else if(gamepad1.dpad_right && !lastDpad){
                 if(gamepad1.left_trigger > .3){
                     dt.headingOffset -= Math.toRadians(1);
+                    lastDpad = true;
                 }else{
                     dt.getPosition().y = dt.getPosition().y + 15;
                     lastDpad = true;
@@ -257,6 +264,7 @@ public class Tele extends LinearOpMode
             else if(gamepad1.dpad_left && !lastDpad){
                 if(gamepad1.left_trigger > .3){
                     dt.headingOffset += Math.toRadians(1);
+                    lastDpad = true;
                 }else{
                     dt.getPosition().y = dt.getPosition().y - 15;
                     lastDpad = true;

@@ -43,7 +43,7 @@ public class Red4
 
         ArrayList<MovementPoint> points6 = new ArrayList<>();
         points6.add(new MovementPoint(1700, 850, 0));
-        points6.add(new MovementPoint(2800, 800, 0));
+        points6.add(new MovementPoint(2800, 900, 0));
         points6.add(new MovementPoint(3100, 800, Math.toRadians(-45), 25));
         paths.add(new PurePursuit(points6));
     }

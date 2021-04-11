@@ -46,7 +46,7 @@ public class AutoAimer
         double angleToSpot = Math.atan2(yToSpot, xToSpot);
         dtValues[0] = angleToSpot + Math.PI/2 - dt.getPosition().heading;
 
-        shooter.setAngle(27 + angleIntercept);
+        shooter.setAngle(25 + angleIntercept);
 
         c++;
         return dtValues;
