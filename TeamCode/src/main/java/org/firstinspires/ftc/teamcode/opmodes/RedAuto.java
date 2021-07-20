@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.utils.RobotMovement;
 
 import java.util.ArrayList;
 
-@Autonomous(name="RED", group="auto")
+@Autonomous(name="RED", group="red")
 public class RedAuto extends LinearOpMode
 {
 
@@ -162,7 +162,7 @@ public class RedAuto extends LinearOpMode
             while(opModeIsActive() && timer.milliseconds() < 800){
                 bulk.tick(true, false);
                 dt.track();
-                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1600, 1300, 0, 0, -.5);
+                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1600, 1300, 0, 0, 0);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
             shooter.setIndexerPos(3);
@@ -170,7 +170,7 @@ public class RedAuto extends LinearOpMode
             while(opModeIsActive() && timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1600, 1300, 0, 0, -.5);
+                double[] drive = aim.track(Positions.psLeftX, Positions.psLeftY, 1600, 1300, 0, 0, 0);
                 dt.drive(drive[0], drive[1], drive[2]);
             }
             shooter.setIndexerPos(0);
@@ -357,7 +357,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 1000){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, 0);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1600, 850, 0, 0, 0);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             shooter.setReleased();
@@ -365,7 +365,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, 0);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1600, 850, 0, 0, 0);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             shooter.setIndexerPos(3);
@@ -515,7 +515,7 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, 0);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, -4, 0, 0);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             shooter.setReleased();
@@ -523,14 +523,14 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, 0);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, -4, 0, 0);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             timer.reset();
             shooter.setIndexerPos(3);
             while(timer.milliseconds() < 750){
                 bulk.tick(true, false);
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, 0);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1400, 850, -4, 0, 0);
                 dt.drive(powers[0], powers[1], powers[2]);
                 dt.track();
             }
@@ -595,14 +595,14 @@ public class RedAuto extends LinearOpMode
             while(timer.milliseconds() < 1000){
                 bulk.tick(true, false);
                 dt.track();
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, 0);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1600, 850, 0, 0, 0);
                 dt.drive(powers[0], powers[1], powers[2]);
             }
             timer.reset();
             shooter.setIndexerPos(3);
             while(timer.milliseconds() < 850){
                 bulk.tick(true, false);
-                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1700, 850, 0, 0, 0);
+                double[] powers = aim.track(Positions.goalX, Positions.goalY, 1600, 850, 0, 0, 0);
                 dt.drive(powers[0], powers[1], powers[2]);
                 dt.track();
             }

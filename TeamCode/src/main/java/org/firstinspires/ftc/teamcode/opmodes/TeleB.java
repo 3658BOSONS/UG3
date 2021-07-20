@@ -8,16 +8,14 @@ import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Shooter;
 import org.firstinspires.ftc.teamcode.hardware.Wobble;
 import org.firstinspires.ftc.teamcode.utils.AutoAimer;
-import org.firstinspires.ftc.teamcode.utils.BosonMath;
 import org.firstinspires.ftc.teamcode.utils.BulkReadHandler;
 import org.firstinspires.ftc.teamcode.utils.MovementPoint;
-import org.firstinspires.ftc.teamcode.utils.PIDF;
 import org.firstinspires.ftc.teamcode.utils.Positions;
 import org.firstinspires.ftc.teamcode.utils.RobotMovement;
 import org.firstinspires.ftc.teamcode.utils.State;
 
-@TeleOp(name="TeleopRed", group = "Tele")
-public class Tele extends LinearOpMode
+@TeleOp(name="TeleopBlue", group = "Tele")
+public class TeleB extends LinearOpMode
 {
 
     private Drivetrain dt;
@@ -35,12 +33,12 @@ public class Tele extends LinearOpMode
     private boolean lastX;
     private boolean isGripping;
     private boolean lastDpad;
-
+//3600
     private double spotX = 1600;
-    private double spotY = 300;
+    private double spotY = 3300;
 
     private double psSpotX = 1600;
-    private double psSpotY = 1300;
+    private double psSpotY = 2300;
 
     private int currentPowershot;
     private boolean lastL;
@@ -150,7 +148,7 @@ public class Tele extends LinearOpMode
                     RobotMovement.driveTowardPoint(dt, telemetry, true, 1);
                 }
 
-                dtValues = aim.track(Positions.goalX, Positions.goalY, spotX, spotY, distanceOffset, sidewaysOffset, 0);
+                dtValues = aim.track(Positions.goalXb, Positions.goalYb, spotX, spotY, distanceOffset, sidewaysOffset, 0);
 
                 double right = gamepad1.right_trigger;
                 if(right >= .3){
@@ -165,16 +163,16 @@ public class Tele extends LinearOpMode
                 double goalPosX;
                 double goalPosY;
                 if(currentPowershot == 0){
-                    goalPosX = Positions.psRightX;
-                    goalPosY = Positions.psRightY;
+                    goalPosX = Positions.psRightXb;
+                    goalPosY = Positions.psRightYb;
                 }
                 else if(currentPowershot == 1){
-                    goalPosX = Positions.psMidX;
-                    goalPosY = Positions.psMidY;
+                    goalPosX = Positions.psMidXb;
+                    goalPosY = Positions.psMidYb;
                 }
                 else{
-                    goalPosX = Positions.psLeftX;
-                    goalPosY = Positions.psLeftY;
+                    goalPosX = Positions.psLeftXb;
+                    goalPosY = Positions.psLeftYb;
                 }
 
                 dtValues = aim.track(goalPosX, goalPosY, psSpotX, psSpotY, distanceOffset, sidewaysOffset, -.5);
@@ -221,7 +219,7 @@ public class Tele extends LinearOpMode
                 dt.resetEncoder();
                 dt.setOffsets(0,0,0);
                 dt.getPosition().x = 455/2;
-                dt.getPosition().y = 455/2;
+                dt.getPosition().y = 3600 - 455/2;
                 dt.getPosition().heading = 0;
             }
 

@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.utils.PIDF;
 
 public class Shooter {
 
-    private final double targetVelocity = 3500;
+    private final double targetVelocity = 3600;
     private final double targetPS = 3000;
     private final double motorRatio = 1;
 
